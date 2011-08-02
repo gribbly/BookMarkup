@@ -1,0 +1,12 @@
+@@section|starts a new section/page|<a name="@@id">|</a>
+@@p|paragraph tag|<p@@param>@@text|</p>
+@@h1|H1 heading|<h1>@@text|</h1>
+@@h2|H2 heading|<h2>@@text|</h2>
+@@h3|H3 heading|<h3>@@text|</h3>
+@@img|image|<div class="mop_ImageCenter"><img@@param>|</img></div>
+@@button|a button that links to a target section|<div class="mop_ButtonRight"><p class="mop_DevText">BUTTON: @@id</p><button class="mop_BasicButton" onclick="window.location='@@id.html'">@@text|</button></div>
+@@continue|automatic continue button magically links to next page|<div class="mop_ButtonRight"><p class="mop_DevText">CONTINUE: @@id</p><button class="mop_BasicButton" onclick="window.location='@@id.html'">@@text|</button></div>
+@@begin|autobutton links to beginning of actual book content|<div class="mop_ButtonRight"><p class="mop_DevText">BEGIN: @@id</p><button class="mop_BasicButton" onclick="window.location='@@id.html'">@@text|</button></div>
+@@olist_start|start an ordered list|<ol@@param>
+@@olist_end|end an ordered list|</ol>
+@@li|a list item must be between @@ulist or @@olist tags|<li@@param>@@text|</li>
