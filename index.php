@@ -278,6 +278,24 @@
 										$debug->debug($command);
 										$output = shell_exec($command);
 									}
+									
+									//@@todo @@hack
+									//need a proper deploy manager. Right now I'm just copying latest everything to staging dir...
+									$stagingDir = "../../Staging/Latest/".$title."/";
+									if(file_exists($stagingDir) == false) {
+										$debug->debug($stagingDir." does not exist. Creating...");
+										mkdir($stagingDir, 0777);
+									}
+									if(file_exists($stagingDir)) {
+										$debug->debug($stagingDir." exists. Copying site...");
+										$command = "cp -Rf '$sessionFolder".$title."' '../../Staging/Latest/'";
+										$debug->debug($command);
+										$output = shell_exec($command);
+										echo "<p>Share version: <a href='http://www.serinette.com/Staging/Latest/".$title."/'>link</a></p>\n";
+									}
+									else {
+										echo "<p>WARNING: Couldn't deploy to $stagingDir</p>\n";
+									}
 								}							
 							}
 							else {
