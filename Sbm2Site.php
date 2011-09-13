@@ -29,8 +29,12 @@ class Sbm2Site {
 		
 		//make output dir if it doesn't exist
 		if(file_exists($outputDir) == false) {
+			$this->debug->debug("Attempting to create site folder: $outputDir");
 			mkdir($outputDir, 0777);
 			$this->debug->debug("Created site folder: $outputDir");
+		}
+		else {
+			$this->debug->debug("Site folder already exists: $outputDir");
 		}
 		
 		//always completely clean $outputDir
@@ -347,9 +351,6 @@ class Sbm2Site {
 			//echo "<div id=\"mop_Preview\">\n";
 			echo "<iframe id=\"mop_Preview\" src=\"$this->startLink\"></iframe>\n";
 			//echo "</div>";
-			echo "<div class=\"sbmDevControls\">\n";
-			echo "<p><button onclick=\"window.location='index.php?deploy=true'\">Deploy</button></p>\n"; //@@todo
-			echo "</div>";
 			$this->EndCurrentHtmlPage();
 			return true;
 		}
