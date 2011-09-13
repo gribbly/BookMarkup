@@ -1,0 +1,4 @@
+.git
+Sessions
+*.log
+PushVersion*
