@@ -114,6 +114,7 @@
 		//document.write("<p>Found cookie: " + c + "</p>");
 		var r = getHashVar("reauth");
 		if(r) {
+			document.write("<p>Revoking cookie: " + c + "</p>");
 			setCookie("SerinetteToolsOauth2AccessToken", "", -3600); //unset token cookie
 			window.location.reload();
 		}
@@ -127,7 +128,7 @@
 			var e = getHashVar("error");
 			if(e) {
 				document.write("<p>Uh oh. Something went wrong with authentication. Please try again...</p><br/>");
-				document.write("<p><button type=\"button\" onclick=\"window.location='index.php#reauth=true'\">Try Again</button></p>");
+				document.write("<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>");
 			}
 			
 			//send user off to get an access token...
@@ -140,7 +141,14 @@
 			document.write("<li>If you've authenticated before, you may not see the Google permission page - that's normal.\n");
 			document.write("<li>BookMarkup Tool will not alter, delete, share or do anything else unpleasant to your docs!\n");
 			document.write("</ul>\n");
-			document.write("<p><button type=\"button\" onclick=\"window.location=\'https://accounts.google.com/o/oauth2/auth?client_id=693213664167.apps.googleusercontent.com&redirect_uri=http://www.serinette.com/Tools/BookMarkup/index.php&scope=http://docs.google.com/feeds/&response_type=token\'\">Authenticate</button></p>");
+			
+			//if we find "BookMarkup_dev" in the URL, we set the redirect URI accordingly. Otherwise default to public tool URI.
+			if(document.URL.indexOf("BookMarkup_dev") != -1) {
+				document.write("<p><button type=\"button\" onclick=\"window.location=\'https://accounts.google.com/o/oauth2/auth?client_id=693213664167.apps.googleusercontent.com&redirect_uri=http://www.serinette.com/Tools/BookMarkup_dev/index.php&scope=http://docs.google.com/feeds/&response_type=token\'\">Authenticate</button></p>");		
+			}
+			else {
+				document.write("<p><button type=\"button\" onclick=\"window.location=\'https://accounts.google.com/o/oauth2/auth?client_id=693213664167.apps.googleusercontent.com&redirect_uri=http://www.serinette.com/Tools/BookMarkup/index.php&scope=http://docs.google.com/feeds/&response_type=token\'\">Authenticate</button></p>");			
+			}
 			document.write("<hr/>");
 		}
 		else {			
@@ -266,7 +274,7 @@
 									}
 									else {
 										echo "<p>Error (401): Authentication has expired - #2</p>\n";
-										echo "<p><button type=\"button\" onclick=\"window.location='index.php#reauth=true'\">Try Again</button></p>";	
+										echo "<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>";	
 									}
 									
 									//@@todo @@hack
@@ -284,7 +292,7 @@
 									$stagingDir = "../../Staging/Latest/".$title."/";
 									if(file_exists($stagingDir) == false) {
 										$debug->debug($stagingDir." does not exist. Creating...");
-										mkdir($stagingDir, 0777);
+										mkdir($stagingDir, 0555);
 									}
 									if(file_exists($stagingDir)) {
 										$debug->debug($stagingDir." exists. Copying site...");
@@ -341,7 +349,8 @@
 				if(strpos($entries, "Error 401")) {
 					$okToGo = false;
 					echo "<p>Error (401): Authentication has expired - #1</p>\n";
-					echo "<p><button type=\"button\" onclick=\"window.location='index.php#reauth=true'\">Try Again</button></p>";			
+					echo "<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>";		
+					//echo "<p><button type=\"button\" onclick=\"window.location.reload()\">Try Again</button></p>";		
 				}
 				else {
 					$entries = explode("<entry>", $entries);

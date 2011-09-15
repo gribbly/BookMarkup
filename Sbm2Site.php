@@ -195,7 +195,19 @@ class Sbm2Site {
 			fwrite($this->fpCurrent, "<h1>$this->docTitle</h1>\n");
 			$dateStamp = date('l jS \of F Y h:i:s A');
 			fwrite($this->fpCurrent, "<p>Generated: $dateStamp</p>\n");
+			
+			//checking for local storage and set up scoring
+			fwrite($this->fpCurrent, "<script>\n");
+			fwrite($this->fpCurrent, "if('localStorage' in window && window['localStorage'] !== null) {\n");
+			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Browser supports Web Storage (that's good!)</p>\");\n");
+			fwrite($this->fpCurrent, "\tlocalStorage['mop.score'] = ".$this->ini_array['StartScore'].";\n");
+			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Current score: \" + localStorage['mop.score'] + \"</p>\");\n");
+			fwrite($this->fpCurrent, "} else {\n");
+			fwrite($this->fpCurrent, "\tdocument.writeln(\"<p>Problem: Browser doesn't support Web Storage (scoring won't work)...</p>\");\n");
+			fwrite($this->fpCurrent, "}\n");
+			fwrite($this->fpCurrent, "</script>\n");
 
+			//main loop
 			echo "<div class=\"sbmConsole\">\n";
 			while($ln = fgets($fpIn)) {
 				trim($ln);
@@ -224,10 +236,12 @@ class Sbm2Site {
 						
 						//$text or $id might contain data. If so, move it to $param.
 						if(strpos($text, "@@data") !== false) {
+							MopLog_i("Found @@data tag in text field - converting to param...");
 							$param = $text;
 							$text = "";
 						}
 						if(strpos($id, "@@data") !== false) {
+							MopLog_i("Found @@data tag in id field - converting to param...");
 							$param = $id;
 							$id = "";
 						}
@@ -305,16 +319,16 @@ class Sbm2Site {
 						
 						if(array_key_exists('htmlClose', $tag)){
 							$outLn = $outLn.$tag['htmlClose'];
-							//MopLog("$outLn");	
+							//MopLog("$outLn");
 						}
 						
-						if($id){
+						if(1){
 							$outLn = str_replace('@@id', $id, $outLn);
 						}
-						if($text){
+						if(1){
 							$outLn = str_replace('@@text', $text, $outLn);
 						}										
-						if($param){
+						if(1){
 							$outLn = str_replace('@@param', $param, $outLn);
 						}
 						
@@ -333,6 +347,7 @@ class Sbm2Site {
 						continue;
 					}
 				}
+				
 				if(!$bTagLine){
 					if($ln !== "") {
 						echo "<p>".trim(htmlentities($ln))."</p>\n";
@@ -345,6 +360,7 @@ class Sbm2Site {
 			MopLog("done");
 			
 			echo "</div>\n";
+			echo "<p>Sbm2Site debug information: <button onclick=\"window.open('Sbm2Site.log')\">Sbm2Site.log</button><button onclick=\"window.open('$this->inputFileName')\">Input SBM</button></p></p>\n";
 			echo "<p><button onclick=\"MopReload()\">Update</button><button onclick=\"window.open('$this->startLink')\">Open eBook</button><button onclick=\"window.location='index.php'\">Start Over</button></p>\n";
 			echo "<hr/>\n";
 			echo "<h2>Preview</h2>\n";

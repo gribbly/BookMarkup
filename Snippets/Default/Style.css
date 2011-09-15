@@ -47,6 +47,12 @@ body:before {
 	width:100%;
 	text-align:center;
 }
+.mop_GenericCenter {
+	/* simple container for general content */
+	
+    margin: 50px auto 30px auto;
+    width: 500px;
+}
 .mop_DevText {
 	display:none;
 	color:grey;

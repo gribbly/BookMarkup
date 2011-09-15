@@ -91,9 +91,9 @@ class Html2Sbm {
 	}
 
 	function RememberAsset($src) {
-		MopLog("RememberAsset()");
+		MopLog("RememberAsset() - ".$src);
 		
-		MopLog_i($src, 1);
+		//MopLog_i($src, 1);
 		
 		$this->discoveredAssets[] = $src;
 	}
@@ -115,10 +115,7 @@ class Html2Sbm {
 			//if(0){
 			if($fpIn && $fpOut){
 				MopLog("Parsing $this->inputFileName.tidy");
-				echo "<div class=\"sbmConsole\">\n";
-				
-				MopLog("New ini file format...");
-				
+				echo "<div class=\"sbmConsole\">\n";				
 				$parseMode = "preamble";
 
 				while($ln = fgets($fpIn)) {
@@ -126,6 +123,7 @@ class Html2Sbm {
 					//bail if we're not authorized
 					if(strpos($ln, "Error 401") !== false) {
 						echo "</div>\n";
+						echo "<p>Authentication error - you probably need to re-authenticate. Try starting over.</p>\n";
 						MopLog("Error 401");
 						return false;
 					}
@@ -223,6 +221,20 @@ class Html2Sbm {
 										//MopLog("OUTLINE: $outLn");
 									break;
 									
+									case "@@scorebutton":
+										MopLog("AS: scorebutton");
+										$bNoParagraph = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $link = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $label = $chunks[2]; }
+										if(array_key_exists(3, $chunks)) { $data = $chunks[3]; }
+	
+										$outLn = $outLn."$sbmTag|$label|$link|$data\n";
+										//MopLog("OUTLINE: $outLn");
+									break;
+									
 									case "@@p":
 										MopLog("AS: paragraph");
 										if($bNoParagraph == true) {
@@ -246,17 +258,15 @@ class Html2Sbm {
 									case "@@img":
 										MopLog("AS: image");
 										$bNoParagraph = true;
-										$text = trim(strip_tags($ln));
-										
-										//<p class="c1 c10"><img height=327 src="https://lh6.googleusercontent.com/CaGw8VIhBnlpJcBZfhQfeUXcaO2l8vUVBbwKhurYBWWNVLAqxHWGBMHqeW-Ov8ZGKTYubcpD-Uq2JieYX2qg5TnqyDcklgmwTDips0pYI9tb3nQLOGo" width=327></p>
+										$text = trim(strip_tags($ln,'<img>'));
+										$text = str_replace("<img ", "", $text);
+										$text = str_replace(">", "", $text);
 										
 										$src = $this->YankData($ln, 'src=', ' width=');
 										$this->RememberAsset($src);
 										
-										$outLn = $outLn."$sbmTag|".$text."\n";
-										//MopLog("OUTLINE: $outLn");
-									
-									
+										$outLn = $outLn."$sbmTag|@@data'".$text."'\n";
+										MopLog("OUTLINE: $outLn");
 									break;
 
 									default:
@@ -269,7 +279,7 @@ class Html2Sbm {
 								}
 								
 								//preserve tag attributes if instructed by ini
-								if($searchTag['keepattribs']) {
+								if($searchTag['keepattribs'] && bNoParagraph == false) {
 									MopLog("Keeping attributes for $sbmTag");
 
 									$attribs = $this->ExtractAttribs($ln, $searchTag['needle']);
@@ -323,7 +333,7 @@ class Html2Sbm {
 				echo "</div>\n";
 				
 				$sbmLink = $this->outputFileName;
-				echo "<p>View debug information: <button onclick=\"window.open('$this->inputFileName.tidy')\">Raw Input HTML</button><button onclick=\"window.open('$sbmLink')\">Raw SBM</button></p>\n";
+				echo "<p>Html2Sbm debug information: <button onclick=\"window.open('Html2Sbm.log')\">Html2Sbm.log</button><button onclick=\"window.open('$this->inputFileName.tidy')\">Input HTML</button>\n";
 				
 				return true;			
 			}
