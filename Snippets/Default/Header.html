@@ -7,4 +7,35 @@
 		@@mop_style_sheet
 </style>
 
+<script>
+	function MopShowScore() {
+		var tmp = parseInt(localStorage['mop.score']);
+		if(tmp > 20) {
+			tmp = 20;
+		}
+		document.write("<div class=\"mop_GenericCenter\">\n");
+		document.write("<table class=\"mop_ScoreTable\"><tr>\n");
+		
+		var i = 0;
+		while(i < 5){
+			if(i < tmp){
+				document.write("<td><img src=\"Images/GoldStar_v2.png\"</img></td>\n");
+			}
+			else {
+				document.write("<td><img src=\"Images/GreyStar_v2.png\"</img></td>\n");
+			}
+			i++;
+		}
+		document.write("</tr></table></div>\n");
+	}
+	function MopHandleScore(s) {
+		var tmp = parseInt(localStorage['mop.score']);
+		tmp = tmp + s;
+		if(tmp < 0) {
+			tmp = 0;
+		}
+		localStorage['mop.score'] = tmp;
+	}
+</script>
+
 </head>

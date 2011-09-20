@@ -51,8 +51,19 @@ body:before {
 	/* simple container for general content */
 	
     margin: 50px auto 30px auto;
-    width: 500px;
+    width: 50%;
+    height: 72px;
 }
+table.mop_ScoreTable {
+
+}
+.mop_ScoreTable td { 
+
+}
+.mop_ScoreTable img {
+	width:64px;
+}
+
 .mop_DevText {
 	display:none;
 	color:grey;

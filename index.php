@@ -11,14 +11,17 @@
 	<script src="../../Libs/jquery.js"></script>
 	<script type="text/javascript">
 		function getHashVar(v) { 
+			document.write("getHashVar - testing " + v + "<br\>\n");
 			var query = window.location.hash.substring(1);
 			var vars = query.split("&"); 
 			for (var i=0;i<vars.length;i++) { 
 				var pair = vars[i].split("="); 
 				if (pair[0] == v) {
+					document.write("getHashVar - returning " + pair[1] + "<br\>\n");
 					return pair[1]; 
 				} 
 			}			
+			document.write("getHashVar - returning false<br\>\n");
 			return false;
 		}
 	
@@ -111,12 +114,16 @@
 	var c = getCookie(n);
 
 	if(c){
-		//document.write("<p>Found cookie: " + c + "</p>");
+		document.write("<p>Found cookie: " + c + "</p>\n");
 		var r = getHashVar("reauth");
 		if(r) {
-			document.write("<p>Revoking cookie: " + c + "</p>");
+			document.write("<p>Forcing reauthorization</p>\n");
+			document.write("<p>Revoking cookie: " + c + "</p>\n");
 			setCookie("SerinetteToolsOauth2AccessToken", "", -3600); //unset token cookie
-			window.location.reload();
+			window.location('index.php');
+		}
+		else {
+			document.write("<p>Didn't find reauth in hashtag</p>\n");
 		}
 	}
 	else {
@@ -255,11 +262,13 @@
 									}					
 									
 									//unzip downloaded file
+									$debug->debug("unzip downloaded file: $dlFileName");
 									$dlFileName = escapeshellarg($dlFileName);
 									$command = "unzip -o $dlFileName -d $sessionFolder";
 									$debug->debug($command);
-									$output = shell_exec($command);
+									shell_exec($command);
 									
+									$debug->debug("rename: $htmlFileName");
 									rename(str_replace(" ", "", $htmlFileName), $htmlFileName); //exporting as zip removes spaces from html filename. Here we replace them.
 									
 									require_once("Html2Sbm.php");
@@ -349,8 +358,9 @@
 				if(strpos($entries, "Error 401")) {
 					$okToGo = false;
 					echo "<p>Error (401): Authentication has expired - #1</p>\n";
-					echo "<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>";		
-					//echo "<p><button type=\"button\" onclick=\"window.location.reload()\">Try Again</button></p>";		
+					//echo "<p><button type=\"button\" onclick=\"window.location.href('index.php?reauth=true')\">Try Again</button></p>";		
+					echo "<p><a href=\"index.php#reauth=true\">Try Again</a></p>";	
+					//echo "<p><a href='http://www.google.com'>Try Again</a></p>";		
 				}
 				else {
 					$entries = explode("<entry>", $entries);
@@ -400,6 +410,40 @@
 				echo "<input type=\"submit\" name=\"make\" value=\"Make eBook\">\n";
 				echo "<input type=\"submit\" name=\"open\" value=\"Open\">\n</p>\n";
 				echo "</form>\n";
+				
+				//do help
+				echo "<hr/>\n";
+				echo "<h2>Help</h2>\n";
+				echo "<p>Most standard HTML formatting options are supported - text size/color, bold, italic, ordered and unordered lists, etc. Simply format the source doc the way you want it, and most formatting will be preserved or translated.</p>\n";
+				echo "<p>An important exception is the \"Heading 1\" style, which is used to create new sections. For user-visible headings use \"Heading 2\" and below.</p>\n";
+				echo "<p>BookMarkup recognizes the following special tags in a source doc:</p>\n";
+				echo "<table>\n";
+				
+				$help_array = parse_ini_file("Html2Sbm.ini", true);
+				foreach($help_array as $help_item) {
+					//print_r($help_item);
+					if(array_key_exists('needle', $help_item)) {
+						if(strpos($help_item['needle'], '@@') !== false) {
+							echo "<tr>\n";
+							echo "\t<td>\n";
+							echo trim(htmlspecialchars($help_item['needle']))."\n";
+							echo "\t</td>\n";
+							echo "\t<td> - </td>\n";
+							echo "\t<td>\n";
+							if(array_key_exists('help', $help_item)) {
+								echo trim(htmlspecialchars($help_item['help']))."\n";
+							}
+							else {
+								echo("<em>No help available for this tag</em>");
+							}
+							echo "\t</td>\n";
+							echo("</tr>\n");
+						}
+					}
+				}
+				
+				echo "</table>";
+				
 			}
 			fclose($fp2);
 		}

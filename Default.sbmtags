@@ -11,4 +11,4 @@
 @@olist_start|start an ordered list|<ol@@param>
 @@olist_end|end an ordered list|</ol>
 @@li|a list item must be between @@ulist or @@olist tags|<li@@param>@@text|</li>
-@@showscore|display current score|<script>document.writeln("Current score: " + localStorage['mop.score']);|</script>
+@@showscore|display current score|<script>window.onload = MopShowScore();|</script>

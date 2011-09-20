@@ -23,33 +23,6 @@ class Sbm2Site {
 		require_once("MopLog.php");
 		MopLog_Init("Sbm2Site.log");
 		
-		//echo "<hr/>\n";
-		//echo "<h2>$docTitle</h2>\n";		
-		//echo "<p>Creating eBook...</p>\n";
-		
-		//make output dir if it doesn't exist
-		if(file_exists($outputDir) == false) {
-			$this->debug->debug("Attempting to create site folder: $outputDir");
-			mkdir($outputDir, 0777);
-			$this->debug->debug("Created site folder: $outputDir");
-		}
-		else {
-			$this->debug->debug("Site folder already exists: $outputDir");
-		}
-		
-		//always completely clean $outputDir
-		if($outputDir) {
-			$command = "rm -rf $outputDir/*";
-			$this->debug->debug($command);
-			shell_exec($command);
-		}
-		
-		//re-create standard directory tree
-		if(!file_exists($outputDir."Images")) { mkdir($outputDir."Images", 0777); }	
-		if(!file_exists($outputDir."Movies")) { mkdir($outputDir."Movies", 0777); }	
-		if(!file_exists($outputDir."Posters")) { mkdir($outputDir."Posters", 0777); }	
-		if(!file_exists($outputDir."Audio")) { mkdir($outputDir."Audio", 0777); }	
-		
 		//read config file
 		$iniFileName = "Sbm2Site.ini";
 		$this->ini_array = parse_ini_file($iniFileName);
@@ -58,7 +31,67 @@ class Sbm2Site {
 			MopLog("$key => $value");
 		}
 		$this->debug->debug("Read ".count($this->ini_array)." entries from $iniFileName...");		
+
+		//nuke $outputDir - we always start with a 100% clean slate
+		if($outputDir) {
+			$tmp = escapeshellarg($outputDir);
+			MopLog("removing $tmp");
+			$command = "rm -rfv $tmp 2>&1 1> /dev/null";
+			MopLog($command);
+			MopLog(shell_exec($command));
+		}
 		
+		//make output dir if it doesn't exist
+		if(file_exists($outputDir) == false) {
+			MopLog("Attempting to create site folder: $outputDir");
+			mkdir($outputDir, 0777);
+			MopLog("Created site folder: $outputDir");
+		}
+		else {
+			$this->debug->debug("ERROR: Site folder didn't get nuked for some reason: $outputDir");
+		}
+		
+		MopLog("***OUTPUT SNAPSHOT START***");
+		MopLog(shell_exec("ls -alR ".escapeshellarg($outputDir)));
+		MopLog("***OUTPUT SNAPSHOT END***");
+		MopLog_lf();
+		
+		//re-create standard directory tree
+		MopLog("re-create standard directory tree");
+		if(!file_exists($outputDir."Images")) { mkdir($outputDir."Images", 0777); }	
+		//if(!file_exists($outputDir."Movies")) { mkdir($outputDir."Movies", 0777); }	
+		//if(!file_exists($outputDir."Posters")) { mkdir($outputDir."Posters", 0777); }	
+		//if(!file_exists($outputDir."Audio")) { mkdir($outputDir."Audio", 0777); }
+		
+		MopLog("***OUTPUT SNAPSHOT START***");
+		MopLog(shell_exec("ls -alR ".escapeshellarg($outputDir)));
+		MopLog("***OUTPUT SNAPSHOT END***");
+		MopLog_lf();		
+
+		//copy all images from Snippets into Images
+		MopLog("copy all images from Snippets into Images - rsync method");
+		$src = $this->ini_array['SnippetsDir']."Images/";
+		$dest = $this->outputDir."Images/";
+		$src = escapeshellarg($src);
+		$dest = escapeshellarg($dest);
+		
+		MopLog("pwd: ".shell_exec("pwd"));
+		MopLog("src: ".$src);
+		MopLog(shell_exec("ls -alR ".escapeshellarg($src)));
+		MopLog("dest: ".$dest);
+		MopLog(shell_exec("ls -alR ".escapeshellarg($dest)));
+		
+		$command = "rsync -vr $src $dest";
+		//$command = "cp -v $src $dest 2>&1 1> /dev/null";
+		MopLog($command);
+		$rsyncOutput = shell_exec($command);
+		MopLog($rsyncOutput);
+		
+		MopLog("***OUTPUT SNAPSHOT START***");
+		MopLog(shell_exec("ls -alR ".escapeshellarg($outputDir)));
+		MopLog("***OUTPUT SNAPSHOT END***");
+		MopLog_lf();
+				
 		//create tag table
 		$sbmTagTableFileName = $this->ini_array['TagTable'];
 		$this->sbmTags = array();
@@ -123,6 +156,7 @@ class Sbm2Site {
 			
 			$styleSheet = str_replace("@@bgurl", "Images/".$this->ini_array['BgImage'], $styleSheet);
 			
+			/*
 			//if necessary, copy the image file to the standard place in output dir
 			if(file_exists($this->outputDir."Images/".$this->ini_array['BgImage']) == false) {
 				$src = $this->ini_array['SnippetsDir']."Images/".$this->ini_array['BgImage'];
@@ -136,6 +170,7 @@ class Sbm2Site {
 				$this->debug->debug("Skippping file copy because ".$this->outputDir."Images/".$this->ini_array['BgImage']." exists");
 				$this->debug->debug(file_exists($this->outputDir."Images/".$this->ini_array['BgImage']));
 			}
+			*/
 		}
 		else {
 			$styleSheet = str_replace("@@bgurl", "", $styleSheet);
@@ -362,6 +397,9 @@ class Sbm2Site {
 			echo "</div>\n";
 			echo "<p>Sbm2Site debug information: <button onclick=\"window.open('Sbm2Site.log')\">Sbm2Site.log</button><button onclick=\"window.open('$this->inputFileName')\">Input SBM</button></p></p>\n";
 			echo "<p><button onclick=\"MopReload()\">Update</button><button onclick=\"window.open('$this->startLink')\">Open eBook</button><button onclick=\"window.location='index.php'\">Start Over</button></p>\n";
+			//echo "<form id='deploy'>\n";
+			//echo "<input type=\"submit\" name=\"deploy\" value=\"Deploy eBook\">\n";
+			//echo "</form>\n";
 			echo "<hr/>\n";
 			echo "<h2>Preview</h2>\n";
 			//echo "<div id=\"mop_Preview\">\n";
