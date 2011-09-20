@@ -333,7 +333,9 @@ class Html2Sbm {
 				echo "</div>\n";
 				
 				$sbmLink = $this->outputFileName;
+				echo "<div class=\"sbmDevControls\">\n";
 				echo "<p>Html2Sbm debug information: <button onclick=\"window.open('Html2Sbm.log')\">Html2Sbm.log</button><button onclick=\"window.open('$this->inputFileName.tidy')\">Input HTML</button>\n";
+				echo "</div>\n";
 				
 				return true;			
 			}

@@ -44,6 +44,7 @@ class DeploySite {
 		
 		MopLog("src: ".$src);
 		MopLog("dest: ".$dest);
+		MopLog("pwd: ".shell_exec("pwd"));
 
 		//nuke $dest - we always start with a 100% clean slate
 		if($dest) {
@@ -53,14 +54,15 @@ class DeploySite {
 		}
 		
 		MopLog("***OUTPUT SNAPSHOT START***");
-		MopLog(shell_exec("ls -alR ".escapeshellarg($dest)));
+		MopLog(shell_exec("ls -alR ".$dest));
 		MopLog("***OUTPUT SNAPSHOT END***");
 		MopLog_lf();		
 		
 		//make output dir if it doesn't exist
 		if(file_exists($dest) == false) {
 			MopLog("Attempting to create site folder: $dest");
-			mkdir($dest, 0777, true);
+			//MopLog("mkdir ".$dest);
+			MopLog(shell_exec("mkdir -pv $dest 2>&1 1> /dev/null"));
 		}
 		else {
 			$this->debug->debug("ERROR: Destination folder didn't get nuked for some reason: $dest");
@@ -68,7 +70,7 @@ class DeploySite {
 		}
 		
 		MopLog("***OUTPUT SNAPSHOT START***");
-		MopLog(shell_exec("ls -alR ".escapeshellarg($dest)));
+		MopLog(shell_exec("ls -alR ".$dest));
 		MopLog("***OUTPUT SNAPSHOT END***");
 		MopLog_lf();		
 
@@ -86,12 +88,25 @@ class DeploySite {
 		MopLog($rsyncOutput);
 		
 		MopLog("***OUTPUT SNAPSHOT START***");
-		MopLog(shell_exec("ls -alR ".escapeshellarg($dest)));
+		MopLog(shell_exec("ls -alR ".$dest));
 		MopLog("***OUTPUT SNAPSHOT END***");
 		MopLog_lf();
 		
-		echo "<p>DeploySite debug information: <button onclick=\"window.open('DeploySite.log')\">DeploySite.log</button></p>\n";
-		echo "<p>Deployed ".$title." to <a href=".$dest." target=\"_new\">link</a></p>\n";
+		if(array_key_exists("UrlRoot", $this->ini_array)) {
+			//assemble shareable url:
+			$shareUrl = $this->ini_array['UrlRoot'].$title."/";
+			//$shareUrl = urlencode($shareUrl);
+			$this->debug->debug("DeploySite - shareUrl: ".$shareUrl);
+			MopLog("shareUrl: ".$shareUrl);
+		}
+		else{
+			$this->debug->debug("ERROR: Couldn't find UrlRoot in DeploySite.ini");
+			echo "ERROR: Couldn't find UrlRoot in DeploySite.ini\n";
+		}
+		echo "<p class=\"sbmDevControls\">DeploySite debug information: <button onclick=\"window.open('DeploySite.log')\">DeploySite.log</button></p>\n";
+		
+		echo "<p>Deployed \"$title\" to <a href=\"$shareUrl\" target=\"_new\">$shareUrl</a></p>\n";
+		
 		echo "<p><button onclick=\"window.history.back()\">Back</button><button onclick=\"window.location='index.php'\">Start Over</button></p>\n";
 		echo "<hr/>\n";
 

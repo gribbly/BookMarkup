@@ -11,17 +11,17 @@
 	<script src="../../Libs/jquery.js"></script>
 	<script type="text/javascript">
 		function getHashVar(v) { 
-			document.write("getHashVar - testing " + v + "<br\>\n");
+			//document.write("getHashVar - testing " + v + "<br\>\n");
 			var query = window.location.hash.substring(1);
 			var vars = query.split("&"); 
 			for (var i=0;i<vars.length;i++) { 
 				var pair = vars[i].split("="); 
 				if (pair[0] == v) {
-					document.write("getHashVar - returning " + pair[1] + "<br\>\n");
+					//document.write("getHashVar - returning " + pair[1] + "<br\>\n");
 					return pair[1]; 
 				} 
 			}			
-			document.write("getHashVar - returning false<br\>\n");
+			//document.write("getHashVar - returning false<br\>\n");
 			return false;
 		}
 	
@@ -57,7 +57,7 @@
 		}
 		
 		function ToggleSbmConsoles(){
-			$('.sbmConsole').toggle("slow");
+			//$('.sbmConsole').toggle("slow");
 			$('.sbmDevControls').toggle("slow");
 		}
 	</script>
@@ -114,16 +114,17 @@
 	var c = getCookie(n);
 
 	if(c){
-		document.write("<p>Found cookie: " + c + "</p>\n");
+		//document.write("<p>Found cookie: " + c + "</p>\n");
 		var r = getHashVar("reauth");
 		if(r) {
 			document.write("<p>Forcing reauthorization</p>\n");
 			document.write("<p>Revoking cookie: " + c + "</p>\n");
 			setCookie("SerinetteToolsOauth2AccessToken", "", -3600); //unset token cookie
-			window.location('index.php');
+			
+			setTimeout(function () { window.location='index.php'; },200);
 		}
 		else {
-			document.write("<p>Didn't find reauth in hashtag</p>\n");
+			//document.write("<p>Didn't find reauth in hashtag</p>\n");
 		}
 	}
 	else {
@@ -209,6 +210,7 @@
 			fclose($fpOut);
 			
 			$debug->debug("We're going to $processMode $processDoc");
+			//echo "We're going to $processMode $processDoc";
 			
 			$fp = fopen($docListFileName, "r");
 			if($fp) {
@@ -220,6 +222,15 @@
 							$alt = trim(addslashes($alt));
 							echo "<script type=\"text/javascript\">window.open('$alt')</script>";
 							echo "<script type=\"text/javascript\">window.location='index.php'</script>";
+						}
+						else if($processMode == "deploy") {
+							$src = $sessionFolder.$title."/";
+							
+							//echo "<p>src: ".$src."</p>\n";
+							//echo "<p>title: ".$title."</p>\n";
+							
+							require_once("DeploySite.php");
+							$deploySite = new DeploySite($src, $title);
 						}
 						else {
 							$dlFileName = $sessionFolder.$title.".zip";	
@@ -295,24 +306,6 @@
 										$debug->debug($command);
 										$output = shell_exec($command);
 									}
-									
-									//@@todo @@hack
-									//need a proper deploy manager. Right now I'm just copying latest everything to staging dir...
-									$stagingDir = "../../Staging/Latest/".$title."/";
-									if(file_exists($stagingDir) == false) {
-										$debug->debug($stagingDir." does not exist. Creating...");
-										mkdir($stagingDir, 0555);
-									}
-									if(file_exists($stagingDir)) {
-										$debug->debug($stagingDir." exists. Copying site...");
-										$command = "cp -Rf '$sessionFolder".$title."' '../../Staging/Latest/'";
-										$debug->debug($command);
-										$output = shell_exec($command);
-										echo "<p>Share version: <a href='http://www.serinette.com/Staging/Latest/".$title."/'>link</a></p>\n";
-									}
-									else {
-										echo "<p>WARNING: Couldn't deploy to $stagingDir</p>\n";
-									}
 								}							
 							}
 							else {
@@ -334,10 +327,11 @@
 			}
 		}
 		else {
-			//$debug->debug("No document specified...");
+			$debug->debug("No document specified...");
+			//echo "No document specified...";
 			
 			//use curl to download document list from Google Docs
-			$ch = curl_init("http://docs.google.com/feeds/documents/private/full/-/document?oauth_token=$t");					
+			$ch = curl_init("http://docs.google.com/feeds/documents/private/full/-/document?oauth_token=$t");			
 			$fp = fopen($docListRawFileName, "w");
 			if($fp) {
 				curl_setopt($ch, CURLOPT_FILE, $fp);
@@ -358,8 +352,9 @@
 				if(strpos($entries, "Error 401")) {
 					$okToGo = false;
 					echo "<p>Error (401): Authentication has expired - #1</p>\n";
-					//echo "<p><button type=\"button\" onclick=\"window.location.href('index.php?reauth=true')\">Try Again</button></p>";		
-					echo "<p><a href=\"index.php#reauth=true\">Try Again</a></p>";	
+					//echo "<p><button type=\"button\" onclick=\"window.location.href('index.php?reauth=true')\">Try Again</button></p>";
+					echo "<p><a href=\"index.php#reauth=true\" target=\"_self\">Try Again</a></p>";
+					echo "<p>If you get stuck, try manually reloading the page - it's a bug, sorry =]</p>";
 					//echo "<p><a href='http://www.google.com'>Try Again</a></p>";		
 				}
 				else {

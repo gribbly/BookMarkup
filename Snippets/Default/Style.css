@@ -1,4 +1,3 @@
-
 body {
 	background:@@bgcolor;
 	background-image:url('@@bgurl');
@@ -26,14 +25,20 @@ body:before {
 	background:white;
 	color:black;
 	
-	width:90%;
-	margin:3% auto 10% auto;	
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 64px;
+	margin-bottom: 64px;
+		
+	width: 750px;
 	
-	padding:2% 2%;
+	padding: 50px 50px 50px 50px;
 	
 	border-style:double;
-	border-color:black;
-	border-width:5px
+	border-color:grey;
+	border-width:7px;
+	
+	outline:white solid 20px;
 }
 .mop_ButtonRight {
 	/* simple container for buttons, etc. */
@@ -70,4 +75,57 @@ table.mop_ScoreTable {
 }
 .mop_BasicButton {
 	margin:6pt;
+}
+
+/* shiny-blue - source: https://github.com/ubuwaits/css3-buttons/blob/gh-pages/css/buttons.css */
+button.shiny-blue {
+	background-color: #759ae9;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#759ae9 0%), to(#376fe0 50%));
+	/* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, #759ae9 0%, #376fe0 50%, #1a5ad9 50%, #2463de 100%);
+	background-image: -moz-linear-gradient(top, #759ae9 0%, #376fe0 50%, #1a5ad9 50%, #2463de 100%);
+	background-image: -ms-linear-gradient(top, #759ae9 0%, #376fe0 50%, #1a5ad9 50%, #2463de 100%);
+	background-image: -o-linear-gradient(top, #759ae9 0%, #376fe0 50%, #1a5ad9 50%, #2463de 100%);
+	background-image: linear-gradient(top, #759ae9 0%, #376fe0 50%, #1a5ad9 50%, #2463de 100%);
+	border-top: 1px solid #1f58cc;
+	border-right: 1px solid #1b4db3;
+	border-bottom: 1px solid #174299;
+	border-left: 1px solid #1b4db3;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	-ms-border-radius: 4px;
+	-o-border-radius: 4px;
+	border-radius: 4px;
+	-webkit-box-shadow: inset 0 0 2px 0 rgba(57, 140, 255, 0.8);
+	-moz-box-shadow: inset 0 0 2px 0 rgba(57, 140, 255, 0.8);
+	-ms-box-shadow: inset 0 0 2px 0 rgba(57, 140, 255, 0.8);
+	-o-box-shadow: inset 0 0 2px 0 rgba(57, 140, 255, 0.8);
+	box-shadow: inset 0 0 2px 0 rgba(57, 140, 255, 0.8);
+	color: #fff;
+	font: bold 12px "helvetica neue", helvetica, arial, sans-serif;
+	padding: 7px 0;
+	text-shadow: 0 -1px 1px #1a5ad9;
+	width: 250px; 
+}
+button.shiny-blue:hover {
+	background-color: #5d89e8;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#5d89e8 0%), to(#2261e0 50%));
+	/* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, #5d89e8 0%, #2261e0 50%, #044bd9 50%, #0d53de 100%);
+	background-image: -moz-linear-gradient(top, #5d89e8 0%, #2261e0 50%, #044bd9 50%, #0d53de 100%);
+	background-image: -ms-linear-gradient(top, #5d89e8 0%, #2261e0 50%, #044bd9 50%, #0d53de 100%);
+	background-image: -o-linear-gradient(top, #5d89e8 0%, #2261e0 50%, #044bd9 50%, #0d53de 100%);
+	background-image: linear-gradient(top, #5d89e8 0%, #2261e0 50%, #044bd9 50%, #0d53de 100%);
+	cursor: pointer; 
+}
+button.shiny-blue:active {
+	border-top: 1px solid #1b4db3;
+	border-right: 1px solid #174299;
+	border-bottom: 1px solid #133780;
+	border-left: 1px solid #174299;
+	-webkit-box-shadow: inset 0 0 5px 2px #1a47a0, 0 1px 0 #eeeeee;
+	-moz-box-shadow: inset 0 0 5px 2px #1a47a0, 0 1px 0 #eeeeee;
+	-ms-box-shadow: inset 0 0 5px 2px #1a47a0, 0 1px 0 #eeeeee;
+	-o-box-shadow: inset 0 0 5px 2px #1a47a0, 0 1px 0 #eeeeee;
+	box-shadow: inset 0 0 5px 2px #1a47a0, 0 1px 0 #eeeeee;
 }

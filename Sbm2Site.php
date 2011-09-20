@@ -395,11 +395,16 @@ class Sbm2Site {
 			MopLog("done");
 			
 			echo "</div>\n";
-			echo "<p>Sbm2Site debug information: <button onclick=\"window.open('Sbm2Site.log')\">Sbm2Site.log</button><button onclick=\"window.open('$this->inputFileName')\">Input SBM</button></p></p>\n";
-			echo "<p><button onclick=\"MopReload()\">Update</button><button onclick=\"window.open('$this->startLink')\">Open eBook</button><button onclick=\"window.location='index.php'\">Start Over</button></p>\n";
-			//echo "<form id='deploy'>\n";
-			//echo "<input type=\"submit\" name=\"deploy\" value=\"Deploy eBook\">\n";
-			//echo "</form>\n";
+			echo "<div class=\"sbmDevControls\">\n";
+			echo "<p>Sbm2Site debug information: <button onclick=\"window.open('Sbm2Site.log')\">Sbm2Site.log</button><button onclick=\"window.open('$this->inputFileName')\">Input SBM</button></p>\n";
+			echo "</div>\n";
+			echo "<p><button onclick=\"MopReload()\">Update eBook</button> <- Update with latest changes from source doc</p>\n";
+			echo "<p><button onclick=\"window.open('$this->startLink')\">View eBook</button> <- Open preview in a new window...</p>\n";
+			echo "<form id='deploy'>\n";
+			echo "<p><input type=\"submit\" name=\"deploy\" value=\"Deploy eBook\"> <- Deploy eBook to shareable link...</p>\n";
+			echo "<input type=\"hidden\" name=\"docname\" value=\"".$this->docTitle."\">\n";
+			echo "</form>\n";
+			echo "<p><button onclick=\"window.location='index.php'\">Start Over</button> <- Return to start and choose a new document...</p>\n";
 			echo "<hr/>\n";
 			echo "<h2>Preview</h2>\n";
 			//echo "<div id=\"mop_Preview\">\n";

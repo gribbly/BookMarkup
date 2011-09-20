@@ -4,10 +4,10 @@
 @@h2|H2 heading|<h2>@@text|</h2>
 @@h3|H3 heading|<h3>@@text|</h3>
 @@img|image|<div class="mop_ImageCenter"><img@@param>|</img></div>
-@@button|a button that links to a target section|<div class="mop_ButtonRight"><p class="mop_DevText">BUTTON: @@id</p><button class="mop_BasicButton" onclick="window.location='@@id.html'">@@text|</button></div>
-@@scorebutton|a button that links to a target section and interacts with the score system|<div class="mop_ButtonRight"><p class="mop_DevText">SCOREBUTTON: @@id</p><button class="mop_BasicButton" onclick="MopHandleScore(@@param);window.location='@@id.html';">@@text|</button></div>
-@@continue|automatic continue button magically links to next page|<div class="mop_ButtonRight"><p class="mop_DevText">CONTINUE: @@id</p><button class="mop_BasicButton" onclick="window.location='@@id.html'">@@text|</button></div>
-@@begin|autobutton links to beginning of actual book content|<div class="mop_ButtonRight"><p class="mop_DevText">BEGIN: @@id</p><button class="mop_BasicButton" onclick="window.location='@@id.html'">@@text|</button></div>
+@@button|a button that links to a target section|<div class="mop_ButtonRight"><p class="mop_DevText">BUTTON: @@id</p><button class="shiny-blue" onclick="window.location='@@id.html'">@@text|</button></div>
+@@scorebutton|a button that links to a target section and interacts with the score system|<div class="mop_ButtonRight"><p class="mop_DevText">SCOREBUTTON: @@id</p><button class="shiny-blue" onclick="MopHandleScore(@@param);window.location='@@id.html';">@@text|</button></div>
+@@continue|automatic continue button magically links to next page|<div class="mop_ButtonRight"><p class="mop_DevText">CONTINUE: @@id</p><button class="shiny-blue" onclick="window.location='@@id.html'">@@text|</button></div>
+@@begin|autobutton links to beginning of actual book content|<div class="mop_ButtonRight"><p class="mop_DevText">BEGIN: @@id</p><button class="shiny-blue" onclick="window.location='@@id.html'">@@text|</button></div>
 @@olist_start|start an ordered list|<ol@@param>
 @@olist_end|end an ordered list|</ol>
 @@li|a list item must be between @@ulist or @@olist tags|<li@@param>@@text|</li>
