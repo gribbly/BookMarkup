@@ -1,0 +1,5 @@
+#
+#	@@cam - I added these ignore patterns for BookMarkup
+#
+*.log
+Sessions/
