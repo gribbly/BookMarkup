@@ -1,3 +1,36 @@
+<?php
+	$sid = "default";
+	if(array_key_exists('PHPSESSID', $_COOKIE)) {
+		$sid = $_COOKIE['PHPSESSID'];
+		//$debug->debug("Resumed session [$sid]");
+	}
+	else {
+		session_start();
+		$sid = htmlspecialchars(session_id());
+		//$debug->debug("Created session [$sid]");		
+	}
+	
+	$sessionFolder = "Sessions/$sid/";
+	if(file_exists($sessionFolder) == false) {
+		mkdir($sessionFolder, 0777);
+		//$debug->debug("Created session folder: $sessionFolder");
+	}
+	
+	if(file_exists($sessionFolder) == true) {
+		setcookie("SerinetteToolsSessionFolder", $sessionFolder);
+	}
+	else {
+		//$debug->debug("ERROR: Session folder doesn't exist: $sessionFolder");
+	}
+	
+	$sessionDoc = "$sessionFolder/SessionDoc";
+	if(file_exists($sessionDoc) == true) {
+		$fpIn = fopen($sessionDoc, "r");
+		$doc = fread($fpIn, filesize($sessionDoc));
+		setcookie("SerinetteToolsSessionDoc", $doc);
+		fclose($fpIn);
+	}
+?>
 <!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
@@ -64,44 +97,11 @@
 
 	<title>Serinette BookMarkup Tool</title>
 </head>
-<body>
 <?php
 	require_once("PHPDebug.php");
 	$debug = new PHPDebug();
-	
-	$sid = "default";
-	
-	if(array_key_exists('PHPSESSID', $_COOKIE)) {
-		$sid = $_COOKIE['PHPSESSID'];
-		$debug->debug("Resumed session [$sid]");
-	}
-	else {
-		session_start();
-		$sid = htmlspecialchars(session_id());
-		$debug->debug("Created session [$sid]");		
-	}
-	
-	$sessionFolder = "Sessions/$sid/";
-	if(file_exists($sessionFolder) == false) {
-		mkdir($sessionFolder, 0777);
-		$debug->debug("Created session folder: $sessionFolder");
-	}
-	
-	if(file_exists($sessionFolder) == true) {
-		setcookie("SerinetteToolsSessionFolder", $sessionFolder);
-	}
-	else {
-		$debug->debug("ERROR: Session folder doesn't exist: $sessionFolder");
-	}
-	
-	$sessionDoc = "$sessionFolder/SessionDoc";
-	if(file_exists($sessionDoc) == true) {
-		$fpIn = fopen($sessionDoc, "r");
-		$doc = fread($fpIn, filesize($sessionDoc));
-		setcookie("SerinetteToolsSessionDoc", $doc);
-		fclose($fpIn);
-	}
 ?>
+<body>
 <div class="centered" id="logobox">
 	<h1 class="revealSlower title">Serinette</h1>
 	<img class="reveal" src="../../images/logo_alpha.png" width="191" height="137"></>
@@ -233,11 +233,13 @@
 							$deploySite = new DeploySite($src, $title);
 						}
 						else {
-							$dlFileName = $sessionFolder.$title.".zip";	
+							$dlFileName = $sessionFolder.$title.".zip";
 							$debug->debug("Downloading $dlFileName");
 
-							//$src = $src."&oauth_token=$t"; //defaults to html is exportFormat is omitted
+							//$src = $src."&oauth_token=$t"; //defaults to html if exportFormat is omitted
 							$src = $src."&exportFormat=zip"."&oauth_token=$t";
+							
+							$src = str_replace("http", "https", $src);
 						
 							$debug->debug("final src for cURL: $src");
 													
@@ -249,6 +251,7 @@
 								curl_setopt($ch, CURLOPT_HEADER, 0);
 								
 								curl_exec($ch);
+								
 								curl_close($ch);
 								if ($curl_errno > 0) {
 									echo "<p>cURL Error ($curl_errno): $curl_error</p>\n";
@@ -458,20 +461,19 @@
 		return $data;
 	}	
 ?>
+<script>
+	$(document).ready(function(){
+		Reveal();
+		$('.sbmConsole').hide();
+		$('.sbmDevControls').hide();
+		$('.sbmDevControls').hide();
+	});
+	
+	<!-- @@mop_helper_scripts|standard mop helper scripts -->
 
-	<script>
-		$(document).ready(function(){
-			Reveal();
-			$('.sbmConsole').hide();
-			$('.sbmDevControls').hide();
-			$('.sbmDevControls').hide();
-		});
-		
-		<!-- @@mop_helper_scripts|standard mop helper scripts -->
-
-		function MopReload() {
-  			window.location.reload()
-		}
-	</script>
+	function MopReload() {
+		window.location.reload()
+	}
+</script>
 </body>
 </html>
