@@ -61,7 +61,7 @@ class Sbm2Site {
 		if(!file_exists($outputDir."Images")) { mkdir($outputDir."Images", 0777); }	
 		//if(!file_exists($outputDir."Movies")) { mkdir($outputDir."Movies", 0777); }	
 		//if(!file_exists($outputDir."Posters")) { mkdir($outputDir."Posters", 0777); }	
-		//if(!file_exists($outputDir."Audio")) { mkdir($outputDir."Audio", 0777); }
+		if(!file_exists($outputDir."Audio")) { mkdir($outputDir."Audio", 0777); }
 		
 		MopLog("***OUTPUT SNAPSHOT START***");
 		MopLog(shell_exec("ls -alR ".escapeshellarg($outputDir)));
@@ -91,6 +91,30 @@ class Sbm2Site {
 		MopLog(shell_exec("ls -alR ".escapeshellarg($outputDir)));
 		MopLog("***OUTPUT SNAPSHOT END***");
 		MopLog_lf();
+
+		//copy all audio from Snippets into Audio
+		MopLog("copy all images from Snippets into Images - rsync method");
+		$src = $this->ini_array['SnippetsDir']."Audio/";
+		$dest = $this->outputDir."Audio/";
+		$src = escapeshellarg($src);
+		$dest = escapeshellarg($dest);
+		
+		MopLog("pwd: ".shell_exec("pwd"));
+		MopLog("src: ".$src);
+		MopLog(shell_exec("ls -alR ".escapeshellarg($src)));
+		MopLog("dest: ".$dest);
+		MopLog(shell_exec("ls -alR ".escapeshellarg($dest)));
+		
+		$command = "rsync -vr $src $dest";
+		//$command = "cp -v $src $dest 2>&1 1> /dev/null";
+		MopLog($command);
+		$rsyncOutput = shell_exec($command);
+		MopLog($rsyncOutput);
+		
+		MopLog("***OUTPUT SNAPSHOT START***");
+		MopLog(shell_exec("ls -alR ".escapeshellarg($outputDir)));
+		MopLog("***OUTPUT SNAPSHOT END***");
+		MopLog_lf();		
 				
 		//create tag table
 		$sbmTagTableFileName = $this->ini_array['TagTable'];
@@ -236,7 +260,9 @@ class Sbm2Site {
 			fwrite($this->fpCurrent, "if('localStorage' in window && window['localStorage'] !== null) {\n");
 			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Browser supports Web Storage (that's good!)</p>\");\n");
 			fwrite($this->fpCurrent, "\tlocalStorage['mop.score'] = ".$this->ini_array['StartScore'].";\n");
+			fwrite($this->fpCurrent, "\tlocalStorage['mop.maxScore'] = ".$this->ini_array['MaxScore'].";\n");
 			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Current score: \" + localStorage['mop.score'] + \"</p>\");\n");
+			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Max score: \" + localStorage['mop.maxScore'] + \"</p>\");\n");
 			fwrite($this->fpCurrent, "} else {\n");
 			fwrite($this->fpCurrent, "\tdocument.writeln(\"<p>Problem: Browser doesn't support Web Storage (scoring won't work)...</p>\");\n");
 			fwrite($this->fpCurrent, "}\n");

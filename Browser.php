@@ -31,9 +31,7 @@
 </head>
 <body>
 <div class="centered" id="logobox">
-	<h1 class="revealSlower title">Serinette</h1>
-	<img class="reveal" src="../../../images/logo_alpha.png" width="191" height="137"></>
-	<h2 class= "revealSlowest" class="tagline">Boutique Digital Publications</h2>
+	<img src="../../images/logo_alpha.png" style="width:10%; height:10%"></img>
 </div>
 	<h1 style="text-align:center">BookMarkup Browser</h1>
 	

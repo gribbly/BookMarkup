@@ -3,11 +3,11 @@
 @@h1|H1 heading|<h1>@@text|</h1>
 @@h2|H2 heading|<h2>@@text|</h2>
 @@h3|H3 heading|<h3>@@text|</h3>
-@@img|image|<div class="mop_ImageCenter"><img@@param>|</img></div>
-@@button|a button that links to a target section|<div class="mop_ButtonRight"><p class="mop_DevText">BUTTON: @@id</p><button class="shiny-blue" onclick="window.location='@@id.html'">@@text|</button></div>
-@@scorebutton|a button that links to a target section and interacts with the score system|<div class="mop_ButtonRight"><p class="mop_DevText">SCOREBUTTON: @@id</p><button class="shiny-blue" onclick="MopHandleScore(@@param);window.location='@@id.html';">@@text|</button></div>
-@@continue|automatic continue button magically links to next page|<div class="mop_ButtonRight"><p class="mop_DevText">CONTINUE: @@id</p><button class="shiny-blue" onclick="window.location='@@id.html'">@@text|</button></div>
-@@begin|autobutton links to beginning of actual book content|<div class="mop_ButtonRight"><p class="mop_DevText">BEGIN: @@id</p><button class="shiny-blue" onclick="window.location='@@id.html'">@@text|</button></div>
+@@img|image|<p class="mop_DevText">IMAGE: @@param</p><div class='mop_Insert'><img class='mop_ImageCenterAutoSkew' @@param>|</img></div>
+@@button|a button that links to a target section|<p class="mop_DevText">BUTTON: @@id</p><div class='glossyButtonContainer'><a class="glossyButton" href="@@id.html"></a><p class="glossyButtonText">@@text</p>|</div>
+@@scorebutton|a button that links to a target section and interacts with the score system|<p class="mop_DevText">SCOREBUTTON: @@id (value: @@param)</p><div class='glossyButtonContainer'><a class="glossyButton" onclick="MopHandleScore(@@param)" href="@@id.html"></a><p class="glossyButtonText">@@text</p>|</div>
+@@continue|automatic continue button magically links to next page|<p class="mop_DevText">CONTINUE: @@id</p><div class='glossyButtonContainer'><a class="glossyButton" href="@@id.html"></a><p class="glossyButtonText">@@text</p>|</div>
+@@begin|autobutton links to beginning of actual book content|<p class="mop_DevText">BEGIN: @@id</p><div class='glossyButtonContainer'><a class="glossyButton" href="@@id.html"></a><p class="glossyButtonText">@@text</p>|</div>
 @@olist_start|start an ordered list|<ol@@param>
 @@olist_end|end an ordered list|</ol>
 @@li|a list item must be between @@ulist or @@olist tags|<li@@param>@@text|</li>

@@ -41,6 +41,23 @@
 	
 	<link rel="stylesheet" href="../../css/basic.css">
 	
+	<style>
+		ul.topNav {
+			list-style-type: none;
+			background:none;
+			color:white;
+		}
+		ul.topNav li {
+			float:left;
+		}
+		ul.topNav a {
+			padding-right: 16px;
+			display: block;
+			text-decoration: underline;
+			color:white;
+		}
+	</style>
+	
 	<script src="../../Libs/jquery.js"></script>
 	<script type="text/javascript">
 		function getHashVar(v) { 
@@ -103,12 +120,15 @@
 ?>
 <body>
 <div class="centered" id="logobox">
-	<h1 class="revealSlower title">Serinette</h1>
-	<img class="reveal" src="../../images/logo_alpha.png" width="191" height="137"></>
-	<h2 class= "revealSlowest" class="tagline">Boutique Digital Publications</h2>
+	<img src="../../images/logo_alpha.png" style="width:10%; height:10%"></img>
 </div>
 <h1 style="text-align:center">BookMarkup Tool</h1>
+<ul class="topNav">
+	<li><a href="index.php">Home</a></li>
+	<li><a href="Browser.php">File Browser</a></li>
+</ul>
 <p style="text-align:right"><button type="button" onclick='ToggleSbmConsoles()'>Show Dev Stuff</button></p>
+<br/>
 <script type="text/javascript">	
 	var n = "SerinetteToolsOauth2AccessToken";
 	var c = getCookie(n);

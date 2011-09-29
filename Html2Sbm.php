@@ -266,6 +266,7 @@ class Html2Sbm {
 										$this->RememberAsset($src);
 										
 										$outLn = $outLn."$sbmTag|@@data'".$text."'\n";
+										//$outLn = $outLn."$sbmTag|@@data'src=".$src."'\n"; //use this version to strip width and height, if desired
 										MopLog("OUTLINE: $outLn");
 									break;
 

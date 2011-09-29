@@ -1,6 +1,21 @@
 </div>
+<audio id="buttonAppearSfx" src="Audio/ButtonSfx.oga"></audio>
 </body>
 <script type="text/javascript">
+	$(document).ready(function(){
+		hideButtons();
+		if( isScrolledIntoView("body")) {
+			showButtons();
+		}
+	  rotateImages();
+	});
+
+	$(window).scroll(function() {
+		if ($('body').height() <= ($(window).height() + $(window).scrollTop())) {
+			showButtons();
+		}
+	});
+
 @@mop_helper_scripts
 </script>
 </html>

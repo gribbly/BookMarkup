@@ -7,17 +7,86 @@
 		@@mop_style_sheet
 </style>
 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" ></script>
 <script>
+	var bButtons = false;
+	var bVideoPlayButton = true;
+	var bImageRotationFlipper = false;
+	
+	function hideButtons(){
+		//console.log("hideButtons()");
+		$("a.glossyButton").fadeOut(0);
+		$("p.glossyButtonText").fadeOut(0);
+		bButtons = false;
+	}
+	
+	function showButtons(){
+		if( bButtons == false ) {
+			//console.log("showButtons()");
+			$("a.glossyButton").fadeIn(800);
+			$("p.glossyButtonText").fadeIn(1200);
+			buttonAppearSfx();
+			bButtons = true;
+		}
+	}
+	
+	function hideVideoPlayButton() {
+		if( bVideoPlayButton == true ) {
+			//console.log("hideVideoPlayButton()");
+			$(".videoPlayButton").fadeOut(600);
+			bVideoPlayButton = false;
+		}
+	}
+	
+	function buttonAppearSfx() {
+		//console.log("buttonAppearSfx()");
+		var mySfx = document.getElementById('buttonAppearSfx');
+		mySfx.play();
+	}	
+
+	function rotateImages() {
+		//console.log("rotateImages()");
+		var imgs = document.getElementsByClassName('mop_ImageCenterAutoSkew');
+		var imgsArray = Array.prototype.slice.call(imgs, 0);
+		imgsArray.forEach(function(img) {
+						  if(bImageRotationFlipper == false) {
+							img.style.MozTransform = "rotate(2deg)";
+							img.style.webkitTransform = "rotate(2deg)";
+							bImageRotationFlipper = true;
+						  }
+						  else {
+							img.style.MozTransform = "rotate(-2deg)";
+							img.style.webkitTransform = "rotate(-2deg)";
+							bImageRotationFlipper = false;
+						  }
+	  });
+	}	
+
+	function isScrolledIntoView(elem)
+	{
+		//http://stackoverflow.com/questions/487073/jquery-check-if-element-is-visible-after-scroling
+		//console.log("isScrolledIntoView - " + elem);
+		var docViewTop = $(window).scrollTop();
+		var docViewBottom = docViewTop + $(window).height();
+		
+		var elemTop = $(elem).offset().top;
+		var elemBottom = elemTop + $(elem).height();
+		
+		var bReturn = ((elemBottom >= docViewTop) && (elemTop <= docViewBottom)
+				&& (elemBottom <= docViewBottom) &&  (elemTop >= docViewTop) );
+		
+		//console.log( "returning: " + bReturn );
+		return bReturn;
+	}
+	
 	function MopShowScore() {
 		var tmp = parseInt(localStorage['mop.score']);
-		if(tmp > 20) {
-			tmp = 20;
-		}
+		
 		document.write("<div class=\"mop_GenericCenter\">\n");
 		document.write("<table class=\"mop_ScoreTable\"><tr>\n");
 		
 		var i = 0;
-		while(i < 5){
+		while(i < parseInt(localStorage['mop.maxScore'])){
 			if(i < tmp){
 				document.write("<td><img src=\"Images/GoldStar_v2.png\"</img></td>\n");
 			}
@@ -28,14 +97,18 @@
 		}
 		document.write("</tr></table></div>\n");
 	}
+	
 	function MopHandleScore(s) {
 		var tmp = parseInt(localStorage['mop.score']);
 		tmp = tmp + s;
 		if(tmp < 0) {
 			tmp = 0;
 		}
+		if(tmp > localStorage['mop.maxScore']) {
+			tmp = localStorage['mop.maxScore'];
+		}
 		localStorage['mop.score'] = tmp;
-	}
+	}	
 </script>
 
 </head>
