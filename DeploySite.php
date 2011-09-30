@@ -107,7 +107,7 @@ class DeploySite {
 		
 		echo "<p>Deployed \"$title\" to <a href=\"$shareUrl\" target=\"_new\">$shareUrl</a></p>\n";
 		
-		echo "<p><button onclick=\"window.history.back()\">Back</button><button onclick=\"window.location='index.php'\">Start Over</button></p>\n";
+		echo "<p><button onclick=\"window.history.back()\">Back</button></p>\n";
 		echo "<hr/>\n";
 
 		

@@ -31,10 +31,15 @@
 </head>
 <body>
 <div class="centered" id="logobox">
-	<img src="../../images/logo_alpha.png" style="width:10%; height:10%"></img>
+	<img src="../../images/logo_alpha_tiny.png" style="width:10%; height:10%"></img>
 </div>
+	<ul class="topNav">
+		<li><a href="index.php">Home</a></li>
+		<li><a href="Browser.php">File Browser</a></li>
+	</ul>
+	<br/>
+	<br/>
 	<h1 style="text-align:center">BookMarkup Browser</h1>
-	
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
 			var elf = $('#elfinder').elfinder({

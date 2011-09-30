@@ -40,24 +40,7 @@
 	<link href='http://fonts.googleapis.com/css?family=Meddon|Sue+Ellen+Francisco&v2' rel='stylesheet' type='text/css'>
 	
 	<link rel="stylesheet" href="../../css/basic.css">
-	
-	<style>
-		ul.topNav {
-			list-style-type: none;
-			background:none;
-			color:white;
-		}
-		ul.topNav li {
-			float:left;
-		}
-		ul.topNav a {
-			padding-right: 16px;
-			display: block;
-			text-decoration: underline;
-			color:white;
-		}
-	</style>
-	
+		
 	<script src="../../Libs/jquery.js"></script>
 	<script type="text/javascript">
 		function getHashVar(v) { 
@@ -120,15 +103,16 @@
 ?>
 <body>
 <div class="centered" id="logobox">
-	<img src="../../images/logo_alpha.png" style="width:10%; height:10%"></img>
+	<img src="../../images/logo_alpha_tiny.png"></img>
 </div>
-<h1 style="text-align:center">BookMarkup Tool</h1>
 <ul class="topNav">
 	<li><a href="index.php">Home</a></li>
 	<li><a href="Browser.php">File Browser</a></li>
 </ul>
-<p style="text-align:right"><button type="button" onclick='ToggleSbmConsoles()'>Show Dev Stuff</button></p>
 <br/>
+<br/>
+<h1 style="text-align:center">BookMarkup Tool</h1>
+<p style="text-align:right"><button type="button" onclick='ToggleSbmConsoles()'>Show Dev Stuff</button></p>
 <script type="text/javascript">	
 	var n = "SerinetteToolsOauth2AccessToken";
 	var c = getCookie(n);
@@ -258,20 +242,15 @@
 
 							//$src = $src."&oauth_token=$t"; //defaults to html if exportFormat is omitted
 							$src = $src."&exportFormat=zip"."&oauth_token=$t";
-							
-							$src = str_replace("http", "https", $src);
-						
 							$debug->debug("final src for cURL: $src");
-													
+							
 							$ch = curl_init($src);
-													
 							$fp = fopen($dlFileName, "w");
+
 							if($fp) {
 								curl_setopt($ch, CURLOPT_FILE, $fp);
 								curl_setopt($ch, CURLOPT_HEADER, 0);
-								
 								curl_exec($ch);
-								
 								curl_close($ch);
 								if ($curl_errno > 0) {
 									echo "<p>cURL Error ($curl_errno): $curl_error</p>\n";
@@ -283,6 +262,7 @@
 									//unzip downloaded file
 									$htmlFileName = $sessionFolder.$title.".html";
 									
+									
 									//clean previous versions
 									if(file_exists($htmlFileName)) {
 										$command = "rm ".escapeshellarg($htmlFileName);
@@ -293,41 +273,60 @@
 										$command = "rm -rf ".escapeshellarg("$sessionFolder/images");
 										$debug->debug($command);
 										$output = shell_exec($command);
-									}					
-									
+									}
+
 									//unzip downloaded file
 									$debug->debug("unzip downloaded file: $dlFileName");
 									$dlFileName = escapeshellarg($dlFileName);
-									$command = "unzip -o $dlFileName -d $sessionFolder";
+									
+									//check that it really is a zip file.  If something went wrong (e.g., authentication has expired) we will get an HTML file instead.
+									$bZipFile = false;
+									$command = "file ".$dlFileName;
 									$debug->debug($command);
-									shell_exec($command);
-									
-									$debug->debug("rename: $htmlFileName");
-									rename(str_replace(" ", "", $htmlFileName), $htmlFileName); //exporting as zip removes spaces from html filename. Here we replace them.
-									
-									require_once("Html2Sbm.php");
-									$html2Sbm = new Html2Sbm($title, $sessionFolder, $processDoc.".html", $processDoc.".sbm");
-									
-									//if (0) {
-									if ($html2Sbm->process()) {
-										require_once("Sbm2Site.php");
-										//note: Be careful! Fourth param (outputDir) in call to Sbm2Site will get nuked!
-										$sbm2Site = new Sbm2Site($title, $sessionFolder, $processDoc.".sbm", $sessionFolder.$title."/");
-										$sbm2Site->process();								
+									$output = shell_exec($command);
+									if(strpos($output, "Zip archive data") !== false) {
+										$debug->debug("confirmed zip: $dlFileName");
+										$bZipFile = true;
+									}
+									$debug->debug("bZipFile: ".$bZipFile);
+									if($bZipFile) {
+										$command = "unzip -o $dlFileName -d $sessionFolder";
+										$debug->debug($command);
+										shell_exec($command);
+										
+										$debug->debug("rename: $htmlFileName");
+										rename(str_replace(" ", "", $htmlFileName), $htmlFileName); //exporting as zip removes spaces from html filename. Here we replace them.
+										
+										require_once("Html2Sbm.php");
+										$html2Sbm = new Html2Sbm($title, $sessionFolder, $processDoc.".html", $processDoc.".sbm");
+										
+										$displayTitle = $html2Sbm->process();
+										
+										if (!$displayTitle) {
+											echo "<p>Error (401): Authentication has expired - #2</p>\n";
+											echo "<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>";	
+										}
+										else {
+											require_once("Sbm2Site.php");
+											//note: Be careful! Fifth param (outputDir) in call to Sbm2Site will get nuked!
+											$sbm2Site = new Sbm2Site($title, $displayTitle, $sessionFolder, $processDoc.".sbm", $sessionFolder.$title."/");
+											$sbm2Site->process();
+										}
+										
+										//@@todo
+										//The way this is done we end up with "images" and "Images" under site folder
+										/*
+										if(file_exists($sessionFolder.$title)) {
+											$debug->debug($sessionFolder.$title." exists. Copying images...");
+											$command = "cp -Rf '$sessionFolder"."images/' '$sessionFolder"."$title/'";
+											$debug->debug($command);
+											$output = shell_exec($command);
+										}
+										*/
 									}
 									else {
-										echo "<p>Error (401): Authentication has expired - #2</p>\n";
-										echo "<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>";	
-									}
-									
-									//@@todo @@hack
-									//need a proper asset manager. Right now I'm just copying all images to site folder...
-									//amongst other issues, this means we have "Images" and "images" in site dir
-									if(file_exists($sessionFolder.$title)) {
-										$debug->debug($sessionFolder.$title." exists. Copying images...");
-										$command = "cp -Rf '$sessionFolder"."images/' '$sessionFolder"."$title/'";
-										$debug->debug($command);
-										$output = shell_exec($command);
+										//downloaded file is not a zip. This is very likely because authentication has expired (so our "zip" file is actually an HTML error page...)
+										echo "<p>Authentication has expired - you need to re-authenticate. Please click on the Home link (above) to start over.</p>\n";
 									}
 								}							
 							}
@@ -337,7 +336,7 @@
 								$debug->debug("Error: couldn't write to $dlFileName");
 								echo "<p><button type=\"button\" onclick=\"window.location='index.php'\">Try Again</button></p>";
 							}
-							fclose($fp);						
+							fclose($fp);
 						}
 						break;
 					}
@@ -354,7 +353,7 @@
 			//echo "No document specified...";
 			
 			//use curl to download document list from Google Docs
-			$ch = curl_init("http://docs.google.com/feeds/documents/private/full/-/document?oauth_token=$t");			
+			$ch = curl_init("https://docs.google.com/feeds/documents/private/full/-/document?oauth_token=$t");			
 			$fp = fopen($docListRawFileName, "w");
 			if($fp) {
 				curl_setopt($ch, CURLOPT_FILE, $fp);
@@ -406,7 +405,7 @@
 					$entry = str_replace("<", "\n<", $entry);
 					$entry = str_replace("\n</", "</", $entry);
 									
-					$id = trim(YankData($entry, "<id>http://docs.google.com/feeds/documents/private/full/document%3A", "</id>"));
+					$id = trim(YankData($entry, "<id>https://docs.google.com/feeds/documents/private/full/document%3A", "</id>"));
 					$title = trim(YankData($entry, "<title type='text'>", "</title>"));	
 					$src = trim(YankData($entry, "<content type='text/html' src='", "'/>"));
 					$alt = trim(YankData(trim($entry), "<link rel='alternate' type='text/html' href='", "'/>"));

@@ -36,6 +36,8 @@ class Html2Sbm {
 		//echo "<p>Parsing \"$docTitle\"</p>\n";
 		MopLog_Init("Html2Sbm.log");
 		
+		$this->displayTitle = $docTitle; //this may be replaced later, if we find a @@title tag...
+		
 		$this->inputFileName = $sessionFolder.$inputFileName;
 		$this->outputFileName = $sessionFolder.$outputFileName;
 		
@@ -123,7 +125,7 @@ class Html2Sbm {
 					//bail if we're not authorized
 					if(strpos($ln, "Error 401") !== false) {
 						echo "</div>\n";
-						echo "<p>Authentication error - you probably need to re-authenticate. Try starting over.</p>\n";
+						echo "<p>Authentication has expired - you need to re-authenticate. Please click on the Home link (above) to start over.</p>\n";
 						MopLog("Error 401");
 						return false;
 					}
@@ -174,6 +176,16 @@ class Html2Sbm {
 								MopLog("ADD: $sbmTag");
 								
 								switch($sbmTag) {
+									case "@@title":
+										MopLog("AS: title");
+										$bNoParagraph = true;
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $discoveredTitle = $chunks[1]; }
+
+										$this->displayTitle = $discoveredTitle;
+									break;
+									
 									case "@@section":
 										MopLog("AS: section");
 										$id = trim(strip_tags($ln));
@@ -269,6 +281,21 @@ class Html2Sbm {
 										//$outLn = $outLn."$sbmTag|@@data'src=".$src."'\n"; //use this version to strip width and height, if desired
 										MopLog("OUTLINE: $outLn");
 									break;
+									
+									case "@@video":
+										MopLog("AS: video");
+										$bNoParagraph = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $src = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $text = $chunks[2]; }
+										
+										$this->RememberAsset($src);
+										
+										$outLn = $outLn."$sbmTag|".$src."|".$text."\n";
+										//MopLog("OUTLINE: $outLn");
+									break;
 
 									default:
 										MopLog("AS: default");
@@ -330,6 +357,11 @@ class Html2Sbm {
 				$fpOut = fopen("$this->discoveredStylesFileName", "w");
 				fwrite($fpOut, serialize($this->discoveredStyles));
 				fclose($fpOut);
+				
+				//write discoveredAssets to disk
+				$fpOut = fopen("$this->discoveredAssetsFileName", "w");
+				fwrite($fpOut, serialize($this->discoveredAssets));
+				fclose($fpOut);
 
 				echo "</div>\n";
 				
@@ -338,7 +370,7 @@ class Html2Sbm {
 				echo "<p>Html2Sbm debug information: <button onclick=\"window.open('Html2Sbm.log')\">Html2Sbm.log</button><button onclick=\"window.open('$this->inputFileName.tidy')\">Input HTML</button>\n";
 				echo "</div>\n";
 				
-				return true;			
+				return $this->displayTitle;		
 			}
 		}
 		else {
