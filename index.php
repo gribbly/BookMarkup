@@ -2,25 +2,22 @@
 	$sid = "default";
 	if(array_key_exists('PHPSESSID', $_COOKIE)) {
 		$sid = $_COOKIE['PHPSESSID'];
-		//$debug->debug("Resumed session [$sid]");
 	}
 	else {
 		session_start();
 		$sid = htmlspecialchars(session_id());
-		//$debug->debug("Created session [$sid]");		
 	}
 	
 	$sessionFolder = "Sessions/$sid/";
 	if(file_exists($sessionFolder) == false) {
 		mkdir($sessionFolder, 0777);
-		//$debug->debug("Created session folder: $sessionFolder");
 	}
 	
 	if(file_exists($sessionFolder) == true) {
 		setcookie("SerinetteToolsSessionFolder", $sessionFolder);
 	}
 	else {
-		//$debug->debug("ERROR: Session folder doesn't exist: $sessionFolder");
+		//ERROR: Session folder doesn't exist
 	}
 	
 	$sessionDoc = "$sessionFolder/SessionDoc";
@@ -30,6 +27,14 @@
 		setcookie("SerinetteToolsSessionDoc", $doc);
 		fclose($fpIn);
 	}
+	if(file_exists("index.log") == true) {
+		$command = "rm ".escapeshellarg("index.log");
+		$output = shell_exec($command);
+	}
+	$indexLog = fopen("index.log.html", "w");
+	fwrite($indexLog, "<!DOCTYPE HTML>\n<html>\n<head>\n<title>index.log</title>\n</head>\n<body>\n");
+	fwrite($indexLog, "index.php - START\n");
+	fwrite($indexLog, "index.php - session folder is <a href='$sessionFolder'>$sessionFolder</a>\n");
 ?>
 <!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
@@ -40,6 +45,27 @@
 	<link href='http://fonts.googleapis.com/css?family=Meddon|Sue+Ellen+Francisco&v2' rel='stylesheet' type='text/css'>
 	
 	<link rel="stylesheet" href="../../css/basic.css">
+	
+	<style>
+.HelpText {
+	font-family:"Courier New", Courier, monospace;
+	font-size:default;
+}
+table
+{
+	font-family:"Courier New", Courier, monospace;
+	font-size:small;
+	border-collapse:collapse;
+	width:100%;
+}
+table,th,td
+{
+	border: 1px solid grey;
+	padding:15px;
+	vertical-align:top;
+}	
+	
+	</style>
 		
 	<script src="../../Libs/jquery.js"></script>
 	<script type="text/javascript">
@@ -97,10 +123,6 @@
 
 	<title>Serinette BookMarkup Tool</title>
 </head>
-<?php
-	require_once("PHPDebug.php");
-	$debug = new PHPDebug();
-?>
 <body>
 <div class="centered" id="logobox">
 	<img src="../../images/logo_alpha_tiny.png"></img>
@@ -112,7 +134,8 @@
 <br/>
 <br/>
 <h1 style="text-align:center">BookMarkup Tool</h1>
-<p style="text-align:right"><button type="button" onclick='ToggleSbmConsoles()'>Show Dev Stuff</button></p>
+<p style="text-align:right"><button type="button" onclick='ToggleSbmConsoles()'>Show Dev Stuff</button>
+<button onclick="window.open('index.log.html')">index.log</button></p>
 <script type="text/javascript">	
 	var n = "SerinetteToolsOauth2AccessToken";
 	var c = getCookie(n);
@@ -186,7 +209,7 @@
 		$uri = $_SERVER['REQUEST_URI']; 	
 		if(strpos($uri, "docname")) {
 			$queryString = parse_url($uri, PHP_URL_QUERY);
-			$debug->debug("Query: $queryString");
+			IndexLog("Query: $queryString\n");
 			
 			$queries = explode("&", $queryString);
 			
@@ -213,16 +236,16 @@
 			fwrite($fpOut, $processDoc);
 			fclose($fpOut);
 			
-			$debug->debug("We're going to $processMode $processDoc");
+			IndexLog("We're going to $processMode $processDoc\n");
 			//echo "We're going to $processMode $processDoc";
 			
 			$fp = fopen($docListFileName, "r");
 			if($fp) {
 				while($ln = fgets($fp)) {
-					list($title, $id, $src, $alt) = explode(",",$ln);
+					list($title, $id, $src, $alt, $etag) = explode(",",trim($ln));
 					if($title === $processDoc) {
 						if($processMode == "open") {
-							$debug->debug("Opening $processDoc");
+							IndexLog("Opening $processDoc\n");
 							$alt = trim(addslashes($alt));
 							echo "<script type=\"text/javascript\">window.open('$alt')</script>";
 							echo "<script type=\"text/javascript\">window.location='index.php'</script>";
@@ -236,106 +259,98 @@
 							require_once("DeploySite.php");
 							$deploySite = new DeploySite($src, $title);
 						}
-						else {
-							$dlFileName = $sessionFolder.$title.".zip";
-							$debug->debug("Downloading $dlFileName");
+						else if($processMode == "make"){							
+							$bDevSkipDownload = true; //will be ignored if we're not in dev site
+							$bDevSkipDownload = false; //will be ignored if we're not in dev site
 
-							//$src = $src."&oauth_token=$t"; //defaults to html if exportFormat is omitted
-							$src = $src."&exportFormat=zip"."&oauth_token=$t";
-							$debug->debug("final src for cURL: $src");
 							
-							$ch = curl_init($src);
-							$fp = fopen($dlFileName, "w");
+							IndexLog("title: $title");
+							IndexLog("etag: $etag");
 
-							if($fp) {
-								curl_setopt($ch, CURLOPT_FILE, $fp);
+							$dlFileName = $sessionFolder.$title.".zip";
+														
+							if(!$bDevSkipDownload && strpos($_SERVER['PHP_SELF'], "BookMarkup_dev") !== false){
+								IndexLog("Downloading $dlFileName\n");
+	
+								//$src = $src."&oauth_token=$t"; //defaults to html if exportFormat is omitted
+								$src = $src."&exportFormat=zip"."&oauth_token=$t";
+								$etagHeader = "If-None-Match: \"$etag\""; //http://code.google.com/apis/documents/docs/2.0/developers_guide_protocol.html#RetrievingCached
+								IndexLog("final src for cURL: $src\n");
+	
+								$ch = curl_init($src);
 								curl_setopt($ch, CURLOPT_HEADER, 0);
-								curl_exec($ch);
-								curl_close($ch);
-								if ($curl_errno > 0) {
-									echo "<p>cURL Error ($curl_errno): $curl_error</p>\n";
-									$debug->debug("cURL Error ($curl_errno): $curl_error");
+								curl_setopt($ch, CURLOPT_HTTPHEADER, array($etagHeader));
+								curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+								$result = curl_exec($ch);
+								$info = curl_getinfo($ch);
+								if( $result === false || $info['http_code'] != 200) {
+									IndexLog("Did NOT download ".$dlFileName." because we got response code: ".$info['http_code']."\n");
 								}
 								else {
-									$debug->debug("cURL - no error.");
-									
-									//unzip downloaded file
-									$htmlFileName = $sessionFolder.$title.".html";
-									
-									
-									//clean previous versions
-									if(file_exists($htmlFileName)) {
-										$command = "rm ".escapeshellarg($htmlFileName);
-										$debug->debug($command);
-										$output = shell_exec($command);
-									}
-									if(file_exists("$sessionFolder/images")) {
-										$command = "rm -rf ".escapeshellarg("$sessionFolder/images");
-										$debug->debug($command);
-										$output = shell_exec($command);
-									}
-
-									//unzip downloaded file
-									$debug->debug("unzip downloaded file: $dlFileName");
-									$dlFileName = escapeshellarg($dlFileName);
-									
-									//check that it really is a zip file.  If something went wrong (e.g., authentication has expired) we will get an HTML file instead.
-									$bZipFile = false;
-									$command = "file ".$dlFileName;
-									$debug->debug($command);
-									$output = shell_exec($command);
-									if(strpos($output, "Zip archive data") !== false) {
-										$debug->debug("confirmed zip: $dlFileName");
-										$bZipFile = true;
-									}
-									$debug->debug("bZipFile: ".$bZipFile);
-									if($bZipFile) {
-										$command = "unzip -o $dlFileName -d $sessionFolder";
-										$debug->debug($command);
-										shell_exec($command);
-										
-										$debug->debug("rename: $htmlFileName");
-										rename(str_replace(" ", "", $htmlFileName), $htmlFileName); //exporting as zip removes spaces from html filename. Here we replace them.
-										
-										require_once("Html2Sbm.php");
-										$html2Sbm = new Html2Sbm($title, $sessionFolder, $processDoc.".html", $processDoc.".sbm");
-										
-										$displayTitle = $html2Sbm->process();
-										
-										if (!$displayTitle) {
-											echo "<p>Error (401): Authentication has expired - #2</p>\n";
-											echo "<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>";	
-										}
-										else {
-											require_once("Sbm2Site.php");
-											//note: Be careful! Fifth param (outputDir) in call to Sbm2Site will get nuked!
-											$sbm2Site = new Sbm2Site($title, $displayTitle, $sessionFolder, $processDoc.".sbm", $sessionFolder.$title."/");
-											$sbm2Site->process();
-										}
-										
-										//@@todo
-										//The way this is done we end up with "images" and "Images" under site folder
-										/*
-										if(file_exists($sessionFolder.$title)) {
-											$debug->debug($sessionFolder.$title." exists. Copying images...");
-											$command = "cp -Rf '$sessionFolder"."images/' '$sessionFolder"."$title/'";
-											$debug->debug($command);
-											$output = shell_exec($command);
-										}
-										*/
-									}
-									else {
-										//downloaded file is not a zip. This is very likely because authentication has expired (so our "zip" file is actually an HTML error page...)
-										echo "<p>Authentication has expired - you need to re-authenticate. Please click on the Home link (above) to start over.</p>\n";
-									}
-								}							
+									IndexLog("Downloaded ".$dlFileName." because we got response code: ".$info['http_code']."\n");
+									file_put_contents($dlFileName, $result);
+								}
+								curl_close($ch);
 							}
 							else {
-								$okToGo = false;
-								echo "<p>Sorry, an internal error occurred.</p>\n";
-								$debug->debug("Error: couldn't write to $dlFileName");
-								echo "<p><button type=\"button\" onclick=\"window.location='index.php'\">Try Again</button></p>";
+								IndexLog("Download of ".$dlFileName." skipped becaused dev flag is set...\n");
 							}
+							
+							//now we unzip file (even if we didn't download)...
+							
+							$htmlFileName = $sessionFolder.$title.".html";
+							
+							//clean previous versions
+							if(file_exists($htmlFileName)) {
+								$command = "rm ".escapeshellarg($htmlFileName);
+								IndexLog($command."\n");
+								$output = shell_exec($command);
+							}
+							if(file_exists("$sessionFolder"."images")) {
+								$command = "rm -rf ".escapeshellarg("$sessionFolder"."images");
+								IndexLog($command."\n");
+								$output = shell_exec($command);
+							}
+
+							//check that it really is a zip file.  If something went wrong (e.g., authentication has expired) we will get an HTML file instead.
+							$dlFileName = escapeshellarg($dlFileName);
+							$bZipFile = false;
+							$command = "file ".$dlFileName;
+							IndexLog($command."\n");
+							$output = shell_exec($command);
+							if(strpos($output, "Zip archive data") !== false) {
+								IndexLog("confirmed zip: $dlFileName\n");
+								$bZipFile = true;
+							}
+							if($bZipFile) {
+								$command = "unzip -o $dlFileName -d $sessionFolder";
+								IndexLog($command."\n");
+								shell_exec($command);
+								
+								IndexLog("rename: $htmlFileName\n");
+								rename(str_replace(" ", "", $htmlFileName), $htmlFileName); //exporting as zip removes spaces from html filename. Here we replace them.
+								
+								require_once("Html2Sbm.php");
+								$html2Sbm = new Html2Sbm($title, $sessionFolder, $processDoc.".html", $processDoc.".sbm");
+								
+								$displayTitle = $html2Sbm->process();
+								
+								if (!$displayTitle) {
+									echo "<p>Error (401): Authentication has expired - #2</p>\n";
+									echo "<p><button type=\"button\" onclick=\"window.location.assign('index.php#reauth=true')\">Try Again</button></p>";	
+								}
+								else {
+									require_once("Sbm2Site.php");
+									//note: Be careful! Fifth param (outputDir) in call to Sbm2Site will get nuked!
+									$sbm2Site = new Sbm2Site($title, $displayTitle, $sessionFolder, $processDoc.".sbm", $sessionFolder.$title."/");
+									$sbm2Site->process();
+								}
+							}
+							else {
+								//downloaded file is not a zip. This is very likely because authentication has expired (so our "zip" file is actually an HTML error page...)
+								IndexLog("ERROR: $dlFileName is not a zip file...\n");
+								echo "<p>Authentication has expired - you need to re-authenticate. Please click on the Home link (above) to start over.</p>\n";
+							}							
 							fclose($fp);
 						}
 						break;
@@ -344,12 +359,12 @@
 			}
 			else {
 				echo "<p>Sorry, an internal error occurred.</p>\n";
-				$debug->debug("Error: couldn't read from $docListFileName.");	
+				IndexLog("Error: couldn't read from $docListFileName\n");	
 				echo "<p><button type=\"button\" onclick=\"window.location='index.php'\">Try Again</button></p>";
 			}
 		}
 		else {
-			$debug->debug("No document specified...");
+			IndexLog("No document specified...\n");
 			//echo "No document specified...";
 			
 			//use curl to download document list from Google Docs
@@ -358,12 +373,13 @@
 			if($fp) {
 				curl_setopt($ch, CURLOPT_FILE, $fp);
 				curl_setopt($ch, CURLOPT_HEADER, 0);
+				curl_setopt($ch, CURLOPT_HTTPHEADER, array('GData-Version: 2.0'));
 				curl_exec($ch);
 				curl_close($ch);
 			}
 			else {
 				echo "<p>Sorry, an internal error occurred.</p>\n";
-				$debug->debug("Error: couldn't write to $docListRawFileName.");
+				IndexLog("Error: couldn't write to $docListRawFileName\n");
 			}
 			fclose($fp);
 			
@@ -376,20 +392,20 @@
 					echo "<p>Error (401): Authentication has expired - #1</p>\n";
 					//echo "<p><button type=\"button\" onclick=\"window.location.href('index.php?reauth=true')\">Try Again</button></p>";
 					echo "<p><a href=\"index.php#reauth=true\" target=\"_self\">Try Again</a></p>";
-					echo "<p>If you get stuck, try manually reloading the page - it's a bug, sorry =]</p>";
+					echo "<p>If you get stuck, try manually reloading the page - it's a bug, sorry =] If you're really stuck, close and re-open your browser (all windows/tabs) and try again.</p>";
 					//echo "<p><a href='http://www.google.com'>Try Again</a></p>";		
 				}
 				else {
-					$entries = explode("<entry>", $entries);
+					$entries = explode("<entry", $entries);
 					$okToGo = true;
 				}
 			}
 			else {
 				echo "<p>Sorry, an internal error occurred.</p>\n";
-				$debug->debug("Error: couldn't read from $docListRawFileName (or couldn't write to $docListFileName).");
+				IndexLog("Error: couldn't read from $docListRawFileName (or couldn't write to $docListFileName)\n");
 			}
 			fclose($fp);
-			
+						
 			if($okToGo === true){		
 				//doc chooser goes here:
 				echo "<h2>Choose Document</h2>\n";
@@ -400,13 +416,11 @@
 					//skip first line
 					if(strpos($entry, "<feed xmlns")){
 						continue;
-					}					
-					//break before each line @@todo - this is kind of suspect... there has to be a better way to explode this (and why am I getting a single string in the first place?
-					$entry = str_replace("<", "\n<", $entry);
-					$entry = str_replace("\n</", "</", $entry);
+					}
 									
-					$id = trim(YankData($entry, "<id>https://docs.google.com/feeds/documents/private/full/document%3A", "</id>"));
-					$title = trim(YankData($entry, "<title type='text'>", "</title>"));	
+					$etag = trim(YankData($entry, "gd:etag='&quot;", "&quot;'>"));
+					$id = trim(YankData($entry, "<id>", "</id>"));
+					$title = trim(YankData($entry, "<title>", "</title>"));	
 					$src = trim(YankData($entry, "<content type='text/html' src='", "'/>"));
 					$alt = trim(YankData(trim($entry), "<link rel='alternate' type='text/html' href='", "'/>"));
 					
@@ -421,7 +435,8 @@
 					else {
 						echo "\t<option value=\"$title\">$title</option>\n";
 					}
-					fwrite($fp2, "$title,$id,$src,$alt\n");
+					IndexLog(htmlentities("$title,$etag")."\n");
+					fwrite($fp2, "$title,$id,$src,$alt,$etag\n");
 				}
 				echo "</select>\n";
 				echo "<input type=\"submit\" name=\"make\" value=\"Make eBook\">\n";
@@ -431,9 +446,9 @@
 				//do help
 				echo "<hr/>\n";
 				echo "<h2>Help</h2>\n";
-				echo "<p>Most standard HTML formatting options are supported - text size/color, bold, italic, ordered and unordered lists, etc. Simply format the source doc the way you want it, and most formatting will be preserved or translated.</p>\n";
-				echo "<p>An important exception is the \"Heading 1\" style, which is used to create new sections. For user-visible headings use \"Heading 2\" and below.</p>\n";
-				echo "<p>BookMarkup recognizes the following special tags in a source doc:</p>\n";
+				echo "<p class=\"HelpText\">Most standard HTML formatting options are supported - text size/color, bold, italic, ordered and unordered lists, etc. Simply format the source doc the way you want it, and most formatting will be preserved or translated.</p>\n";
+				echo "<p class=\"HelpText\">An important exception is the \"Heading 1\" style, which is used to create new sections. For user-visible headings use \"Heading 2\" and below.</p>\n";
+				echo "<p class=\"HelpText\">BookMarkup recognizes the following special tags in a source doc:</p>\n";
 				echo "<table>\n";
 				
 				$help_array = parse_ini_file("Html2Sbm.ini", true);
@@ -445,7 +460,6 @@
 							echo "\t<td>\n";
 							echo trim(htmlspecialchars($help_item['needle']))."\n";
 							echo "\t</td>\n";
-							echo "\t<td> - </td>\n";
 							echo "\t<td>\n";
 							if(array_key_exists('help', $help_item)) {
 								echo trim(htmlspecialchars($help_item['help']))."\n";
@@ -454,6 +468,15 @@
 								echo("<em>No help available for this tag</em>");
 							}
 							echo "\t</td>\n";
+							echo "\t<td>\n";
+							if(array_key_exists('help_example', $help_item)) {
+								echo trim(htmlspecialchars("Syntax: ".$help_item['help_example']))."\n";
+							}
+							else {
+								echo("<em>No help available for this tag</em>");
+							}
+							echo "\t</td>\n";
+							
 							echo("</tr>\n");
 						}
 					}
@@ -468,6 +491,10 @@
 	else {
 		//echo "<p>Authentication required!</p>";
 	}
+	
+	IndexLog("index.php - DONE\n");
+	IndexLog("</body>\n</html>\n");
+	fclose($indexLog);
 
 	function YankData($line, $startTag, $endTag){
 		$data = "";
@@ -476,9 +503,14 @@
 		}
 		if(strpos($data, $endTag)){
 			$data = substr($data, 0, strpos($data, $endTag)); 						//snip $endTag and everything after it
-		}	
+		}
 		return $data;
-	}	
+	}
+	
+	function IndexLog($msg){
+		global $indexLog;
+		fwrite($indexLog, "<p>$msg</p>");
+	}
 ?>
 <script>
 	$(document).ready(function(){

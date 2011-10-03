@@ -131,19 +131,67 @@ class Sbm2Site {
 		$this->LogOutputSnapshot($outputDir);
 
 		//copy all audio from Snippets into Audio
-		MopLog("copy all audio from Snippets into Audio - rsync method");
+		MopLog("copy all audio from Snippets into 'Audio'");
 		$src = escapeshellarg($this->ini_array['SnippetsDir']."Audio/");
 		$dest = escapeshellarg($this->outputDir."Audio/");
 		$this->SyncFolders($src, $dest);
 		$this->LogOutputSnapshot($outputDir);
+		
+		//copy all discovered Assets into the appropriate location
+		MopLog("copy discovered assets...");
+		foreach($this->discoveredAssets as $k => $asset) {
+			$asset = str_replace("\"", "", $asset);
+			MopLog_i("$asset", 1);
+			
+			//first determine file type using extension
+			$ext = substr($asset, strrpos($asset, ".") + 1);
+			$ext = strtolower($ext);
+			
+			switch($ext) {
+				case "gif":
+				case "jpg":
+				case "png":
+					MopLog_i("$asset is an IMAGE with extension '$ext'", 1);
+				break;
+				
+				case "ogv":
+					MopLog_i("$asset is VIDEO with extension '$ext'", 1);
+					$this->CopyFile(escapeshellarg($asset), escapeshellarg($outputDir."Video/"));
+				break;
+				
+				case "oga":
+				case "mp3":
+					MopLog_i("$asset is AUDIO with extension '$ext'", 1);
+				break;
+				
+				default:
+					MopLog_i("WARNING: Unknown extension '$ext' encountered. Asset: 'asset'", 1);
+
+			}
+			MopLog_lf();
+		}
+		$this->LogOutputSnapshot($outputDir);
+		
 		
 		/*----------------------------------------------------------------------------
 			END: Asset management
 		----------------------------------------------------------------------------*/		
 	}
 
+	function CopyFile($s, $d) {
+		MopLog("CopyFile pwd: ".shell_exec("pwd"));
+		MopLog("src: ".$s);
+		MopLog(shell_exec("ls -alR ".escapeshellarg($s)));
+		MopLog("dest: ".$d);
+		MopLog(shell_exec("ls -alR ".escapeshellarg($d)));
+		
+		$command = "rsync -vc $s $d";
+		MopLog($command);
+		$rsyncOutput = shell_exec($command);
+		MopLog($rsyncOutput);		
+	}
 	function SyncFolders($s, $d){
-		MopLog("pwd: ".shell_exec("pwd"));
+		MopLog("SyncFolders pwd: ".shell_exec("pwd"));
 		MopLog("src: ".$s);
 		MopLog(shell_exec("ls -alR ".escapeshellarg($s)));
 		MopLog("dest: ".$d);
@@ -290,12 +338,12 @@ class Sbm2Site {
 						
 						//$text or $id might contain data. If so, move it to $param.
 						if(strpos($text, "@@data") !== false) {
-							MopLog_i("Found @@data tag in text field - converting to param...");
+							MopLog_i("Found @@data tag in text field - converting to param...", 1);
 							$param = $text;
 							$text = "";
 						}
 						if(strpos($id, "@@data") !== false) {
-							MopLog_i("Found @@data tag in id field - converting to param...");
+							MopLog_i("Found @@data tag in id field - converting to param...", 1);
 							$param = $id;
 							$id = "";
 						}
@@ -362,6 +410,11 @@ class Sbm2Site {
 								}
 								$n++;
 							}
+						}
+						
+						if($type == "@@video"){
+							$param = "$id";
+							$id = "Video/$id";
 						}
 						
 						//default handling (for all @@tags)

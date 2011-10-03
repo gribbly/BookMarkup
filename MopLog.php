@@ -40,7 +40,7 @@
 			MopLog_tofile("\n");
 		}
 	}
-	
+
 	function MopLog_i($msg, $v) {
 		if($v >= $GLOBALS['verbose']){ 
 			//echo "\t$msg\n";

@@ -288,12 +288,15 @@ class Html2Sbm {
 										
 										$chunks = explode("|", trim(strip_tags($ln)));
 										
-										if(array_key_exists(1, $chunks)) { $src = $chunks[1]; }
-										if(array_key_exists(2, $chunks)) { $text = $chunks[2]; }
+										if(array_key_exists(1, $chunks)) { $text = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $src = $chunks[2]; }
 										
 										$this->RememberAsset($src);
 										
-										$outLn = $outLn."$sbmTag|".$src."|".$text."\n";
+										//now throw away path
+										$src = substr($src, strrpos($src, "/") + 1);
+										
+										$outLn = $outLn."$sbmTag|".$text."|".$src."\n";
 										//MopLog("OUTLINE: $outLn");
 									break;
 
