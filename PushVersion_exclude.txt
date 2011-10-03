@@ -3,4 +3,5 @@
 Sessions
 Assets
 *.log
+*.log.html
 PushVersion*

@@ -152,6 +152,7 @@ class Sbm2Site {
 				case "jpg":
 				case "png":
 					MopLog_i("$asset is an IMAGE with extension '$ext'", 1);
+					$this->CopyFile(escapeshellarg($asset), escapeshellarg($outputDir."Images/"));
 				break;
 				
 				case "ogv":
@@ -162,6 +163,7 @@ class Sbm2Site {
 				case "oga":
 				case "mp3":
 					MopLog_i("$asset is AUDIO with extension '$ext'", 1);
+					$this->CopyFile(escapeshellarg($asset), escapeshellarg($outputDir."Audio/"));
 				break;
 				
 				default:
@@ -331,6 +333,12 @@ class Sbm2Site {
 						//first chunk is always type
 						if(array_key_exists(0, $chunks)) { $type = $chunks[0]; }
 						
+						//@@todo - need to separate matching and processing
+						//1. iterate through tags and collect matches
+						//2. (maybe: sort matches by some sensible criteria)
+						//3. iterate through matches and apply transformations
+						//This robustly solves the @@p vs @@placeholder problem
+						
 						//then it goes: text, id, data
 						if(array_key_exists(1, $chunks)) { $text = $chunks[1]; } else { $text = ""; }
 						if(array_key_exists(2, $chunks)) { $id = $chunks[2]; } else { $id = ""; }
@@ -411,14 +419,27 @@ class Sbm2Site {
 								$n++;
 							}
 						}
-						
-						if($type == "@@video"){
+
+						if($type == "@@image" || $type == "@@video" || $type == "@@audio" ){
 							$param = "$id";
-							$id = "Video/$id";
+							switch($type) {
+								case "@@image": 
+									$id = "Images/$id";
+									break;
+								case "@@video": 
+									$id = "Video/$id";
+									break;
+								case "@@audio": 
+									$id = "Audio/$id";
+									break;									
+							}
+						}
+						if($type == "@@mopplaceholder" ){
+							$param = "$id";
+							$id = "Images/$id";
 						}
 						
 						//default handling (for all @@tags)
-
 						if(array_key_exists('htmlOpen', $tag)){
 							$outLn = $tag['htmlOpen'];
 							//MopLog("$outLn");

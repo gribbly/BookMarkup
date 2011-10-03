@@ -268,7 +268,7 @@ class Html2Sbm {
 									break;
 									
 									case "@@img":
-										MopLog("AS: image");
+										MopLog("AS: image (embedded");
 										$bNoParagraph = true;
 										$text = trim(strip_tags($ln,'<img>'));
 										$text = str_replace("<img ", "", $text);
@@ -281,6 +281,28 @@ class Html2Sbm {
 										//$outLn = $outLn."$sbmTag|@@data'src=".$src."'\n"; //use this version to strip width and height, if desired
 										MopLog("OUTLINE: $outLn");
 									break;
+
+									case "@@image":
+										MopLog("AS: image");
+										$bNoParagraph = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $text = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $src = $chunks[2]; }
+										
+										if($src === "placeholder") {
+											MopLog("This is a placeholder");
+											//@@todo - shouldn't be hardcoding placeholder src, but I am =]
+											$outLn = $outLn."@@mopplaceholder|".$text."|"."PlaceholderImage.gif"."\n";
+										}
+										else {
+											$this->RememberAsset($src);
+											$src = substr($src, strrpos($src, "/") + 1); //throw away path
+											$outLn = $outLn = $outLn."$sbmTag|".$text."|".$src."\n";
+										}
+										MopLog("OUTLINE: $outLn");
+									break;
 									
 									case "@@video":
 										MopLog("AS: video");
@@ -291,14 +313,40 @@ class Html2Sbm {
 										if(array_key_exists(1, $chunks)) { $text = $chunks[1]; }
 										if(array_key_exists(2, $chunks)) { $src = $chunks[2]; }
 										
-										$this->RememberAsset($src);
-										
-										//now throw away path
-										$src = substr($src, strrpos($src, "/") + 1);
-										
-										$outLn = $outLn."$sbmTag|".$text."|".$src."\n";
-										//MopLog("OUTLINE: $outLn");
+										if($src === "placeholder") {
+											MopLog("This is a placeholder");
+											//@@todo - shouldn't be hardcoding placeholder src, but I am =]
+											$outLn = $outLn."@@mopplaceholder|".$text."|"."PlaceholderVideo.gif"."\n";
+										}
+										else {
+											$this->RememberAsset($src);
+											$src = substr($src, strrpos($src, "/") + 1); //throw away path
+											$outLn = $outLn = $outLn."$sbmTag|".$text."|".$src."\n";
+										}
+										MopLog("OUTLINE: $outLn");
 									break;
+									
+									case "@@audio":
+										MopLog("AS: audio");
+										$bNoParagraph = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $text = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $src = $chunks[2]; }
+										
+										if($src === "placeholder") {
+											MopLog("This is a placeholder");
+											//@@todo - shouldn't be hardcoding placeholder src, but I am =]
+											$outLn = $outLn."@@mopplaceholder|".$text."|"."PlaceholderAudio.gif"."\n";
+										}
+										else {
+											$this->RememberAsset($src);
+											$src = substr($src, strrpos($src, "/") + 1); //throw away path
+											$outLn = $outLn = $outLn."$sbmTag|".$text."|".$src."\n";
+										}
+										MopLog("OUTLINE: $outLn");
+									break;									
 
 									default:
 										MopLog("AS: default");

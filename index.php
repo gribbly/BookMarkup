@@ -209,7 +209,7 @@ table,th,td
 		$uri = $_SERVER['REQUEST_URI']; 	
 		if(strpos($uri, "docname")) {
 			$queryString = parse_url($uri, PHP_URL_QUERY);
-			IndexLog("Query: $queryString\n");
+			IndexLog("Query: $queryString");
 			
 			$queries = explode("&", $queryString);
 			
@@ -236,7 +236,7 @@ table,th,td
 			fwrite($fpOut, $processDoc);
 			fclose($fpOut);
 			
-			IndexLog("We're going to $processMode $processDoc\n");
+			IndexLog("We're going to $processMode $processDoc");
 			//echo "We're going to $processMode $processDoc";
 			
 			$fp = fopen($docListFileName, "r");
@@ -245,7 +245,7 @@ table,th,td
 					list($title, $id, $src, $alt, $etag) = explode(",",trim($ln));
 					if($title === $processDoc) {
 						if($processMode == "open") {
-							IndexLog("Opening $processDoc\n");
+							IndexLog("Opening $processDoc");
 							$alt = trim(addslashes($alt));
 							echo "<script type=\"text/javascript\">window.open('$alt')</script>";
 							echo "<script type=\"text/javascript\">window.location='index.php'</script>";
@@ -263,19 +263,18 @@ table,th,td
 							$bDevSkipDownload = true; //will be ignored if we're not in dev site
 							$bDevSkipDownload = false; //will be ignored if we're not in dev site
 
-							
 							IndexLog("title: $title");
 							IndexLog("etag: $etag");
 
 							$dlFileName = $sessionFolder.$title.".zip";
 														
 							if(!$bDevSkipDownload && strpos($_SERVER['PHP_SELF'], "BookMarkup_dev") !== false){
-								IndexLog("Downloading $dlFileName\n");
+								IndexLog("Downloading $dlFileName");
 	
 								//$src = $src."&oauth_token=$t"; //defaults to html if exportFormat is omitted
 								$src = $src."&exportFormat=zip"."&oauth_token=$t";
 								$etagHeader = "If-None-Match: \"$etag\""; //http://code.google.com/apis/documents/docs/2.0/developers_guide_protocol.html#RetrievingCached
-								IndexLog("final src for cURL: $src\n");
+								IndexLog("final src for cURL: $src");
 	
 								$ch = curl_init($src);
 								curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -284,16 +283,16 @@ table,th,td
 								$result = curl_exec($ch);
 								$info = curl_getinfo($ch);
 								if( $result === false || $info['http_code'] != 200) {
-									IndexLog("Did NOT download ".$dlFileName." because we got response code: ".$info['http_code']."\n");
+									IndexLog("Did NOT download ".$dlFileName." because we got response code: ".$info['http_code']."");
 								}
 								else {
-									IndexLog("Downloaded ".$dlFileName." because we got response code: ".$info['http_code']."\n");
+									IndexLog("Downloaded ".$dlFileName." because we got response code: ".$info['http_code']);
 									file_put_contents($dlFileName, $result);
 								}
 								curl_close($ch);
 							}
 							else {
-								IndexLog("Download of ".$dlFileName." skipped becaused dev flag is set...\n");
+								IndexLog("Download of ".$dlFileName." skipped becaused dev flag is set...");
 							}
 							
 							//now we unzip file (even if we didn't download)...
@@ -303,12 +302,12 @@ table,th,td
 							//clean previous versions
 							if(file_exists($htmlFileName)) {
 								$command = "rm ".escapeshellarg($htmlFileName);
-								IndexLog($command."\n");
+								IndexLog($command);
 								$output = shell_exec($command);
 							}
 							if(file_exists("$sessionFolder"."images")) {
 								$command = "rm -rf ".escapeshellarg("$sessionFolder"."images");
-								IndexLog($command."\n");
+								IndexLog($command);
 								$output = shell_exec($command);
 							}
 
@@ -316,18 +315,18 @@ table,th,td
 							$dlFileName = escapeshellarg($dlFileName);
 							$bZipFile = false;
 							$command = "file ".$dlFileName;
-							IndexLog($command."\n");
+							IndexLog($command);
 							$output = shell_exec($command);
 							if(strpos($output, "Zip archive data") !== false) {
-								IndexLog("confirmed zip: $dlFileName\n");
+								IndexLog("confirmed zip: $dlFileName");
 								$bZipFile = true;
 							}
 							if($bZipFile) {
 								$command = "unzip -o $dlFileName -d $sessionFolder";
-								IndexLog($command."\n");
+								IndexLog($command);
 								shell_exec($command);
 								
-								IndexLog("rename: $htmlFileName\n");
+								IndexLog("rename: $htmlFileName");
 								rename(str_replace(" ", "", $htmlFileName), $htmlFileName); //exporting as zip removes spaces from html filename. Here we replace them.
 								
 								require_once("Html2Sbm.php");
@@ -348,7 +347,7 @@ table,th,td
 							}
 							else {
 								//downloaded file is not a zip. This is very likely because authentication has expired (so our "zip" file is actually an HTML error page...)
-								IndexLog("ERROR: $dlFileName is not a zip file...\n");
+								IndexLog("ERROR: $dlFileName is not a zip file...");
 								echo "<p>Authentication has expired - you need to re-authenticate. Please click on the Home link (above) to start over.</p>\n";
 							}							
 							fclose($fp);
@@ -359,7 +358,7 @@ table,th,td
 			}
 			else {
 				echo "<p>Sorry, an internal error occurred.</p>\n";
-				IndexLog("Error: couldn't read from $docListFileName\n");	
+				IndexLog("Error: couldn't read from $docListFileName");	
 				echo "<p><button type=\"button\" onclick=\"window.location='index.php'\">Try Again</button></p>";
 			}
 		}
@@ -379,7 +378,7 @@ table,th,td
 			}
 			else {
 				echo "<p>Sorry, an internal error occurred.</p>\n";
-				IndexLog("Error: couldn't write to $docListRawFileName\n");
+				IndexLog("Error: couldn't write to $docListRawFileName");
 			}
 			fclose($fp);
 			
@@ -402,7 +401,7 @@ table,th,td
 			}
 			else {
 				echo "<p>Sorry, an internal error occurred.</p>\n";
-				IndexLog("Error: couldn't read from $docListRawFileName (or couldn't write to $docListFileName)\n");
+				IndexLog("Error: couldn't read from $docListRawFileName (or couldn't write to $docListFileName)");
 			}
 			fclose($fp);
 						
@@ -435,7 +434,7 @@ table,th,td
 					else {
 						echo "\t<option value=\"$title\">$title</option>\n";
 					}
-					IndexLog(htmlentities("$title,$etag")."\n");
+					IndexLog(htmlentities("$title,$etag"));
 					fwrite($fp2, "$title,$id,$src,$alt,$etag\n");
 				}
 				echo "</select>\n";
@@ -492,7 +491,7 @@ table,th,td
 		//echo "<p>Authentication required!</p>";
 	}
 	
-	IndexLog("index.php - DONE\n");
+	IndexLog("index.php - DONE");
 	IndexLog("</body>\n</html>\n");
 	fclose($indexLog);
 
@@ -509,7 +508,7 @@ table,th,td
 	
 	function IndexLog($msg){
 		global $indexLog;
-		fwrite($indexLog, "<p>$msg</p>");
+		fwrite($indexLog, "<p>$msg</p>\n");
 	}
 ?>
 <script>

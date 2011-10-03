@@ -2,5 +2,6 @@
 #	@@cam - I added these ignore patterns for BookMarkup
 #
 *.log
+*.log.html
 Sessions/
 Assets/
