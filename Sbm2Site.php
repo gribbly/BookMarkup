@@ -152,18 +152,20 @@ class Sbm2Site {
 				case "jpg":
 				case "png":
 					MopLog_i("$asset is an IMAGE with extension '$ext'", 1);
-					$this->CopyFile(escapeshellarg($asset), escapeshellarg($outputDir."Images/"));
+					$this->CopyFile(escapeshellarg("../".$asset), escapeshellarg($outputDir."Images/"));
 				break;
 				
 				case "ogv":
+				case "webm":
+				case "mp4":
 					MopLog_i("$asset is VIDEO with extension '$ext'", 1);
-					$this->CopyFile(escapeshellarg($asset), escapeshellarg($outputDir."Video/"));
+					$this->CopyFile(escapeshellarg("../".$asset), escapeshellarg($outputDir."Video/"));
 				break;
 				
 				case "oga":
 				case "mp3":
 					MopLog_i("$asset is AUDIO with extension '$ext'", 1);
-					$this->CopyFile(escapeshellarg($asset), escapeshellarg($outputDir."Audio/"));
+					$this->CopyFile(escapeshellarg("../".$asset), escapeshellarg($outputDir."Audio/"));
 				break;
 				
 				default:
