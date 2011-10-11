@@ -44,29 +44,8 @@
 	
 	<link href='http://fonts.googleapis.com/css?family=Meddon|Sue+Ellen+Francisco&v2' rel='stylesheet' type='text/css'>
 	
-	<link rel="stylesheet" href="../../css/basic.css">
-	
-	<style>
-.HelpText {
-	font-family:"Courier New", Courier, monospace;
-	font-size:default;
-}
-table
-{
-	font-family:"Courier New", Courier, monospace;
-	font-size:small;
-	border-collapse:collapse;
-	width:100%;
-}
-table,th,td
-{
-	border: 1px solid grey;
-	padding:15px;
-	vertical-align:top;
-}	
-	
-	</style>
-		
+	<link rel="stylesheet" href="css/BookMarkup.css">
+			
 	<script src="../../Libs/jquery.js"></script>
 	<script type="text/javascript">
 		function getHashVar(v) { 
@@ -267,8 +246,13 @@ table,th,td
 							IndexLog("etag: $etag");
 
 							$dlFileName = $sessionFolder.$title.".zip";
+							
+							if(strpos($_SERVER['PHP_SELF'], "BookMarkup_dev") === false){
+								$bDevSkipDownload = true;
+								IndexLog("Overriding bDevSkipDownload because we're on a production server...");
+							}
 														
-							if(!$bDevSkipDownload && strpos($_SERVER['PHP_SELF'], "BookMarkup_dev") !== false){
+							if(!$bDevSkipDownload){
 								IndexLog("Downloading $dlFileName");
 	
 								//$src = $src."&oauth_token=$t"; //defaults to html if exportFormat is omitted

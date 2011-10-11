@@ -19,6 +19,7 @@ class Sbm2Site {
 		$this->tocTableFileName = $sessionFolder.$docTitle.".toctable";
 		$this->discoveredStylesFileName = $sessionFolder.$docTitle.".styles";
 		$this->discoveredAssetsFileName = $sessionFolder.$docTitle.".assets";
+		$this->missingAssetsFileName = $sessionFolder.$docTitle.".missingassets";
 		$this->outputDir = $outputDir;
 		
 	   	$log = "nil";
@@ -68,11 +69,14 @@ class Sbm2Site {
 		//recreate discovered styles table from disk
 		$this->discoveredAssets = array();
 		$this->discoveredAssets = unserialize(file_get_contents($this->discoveredAssetsFileName));
+		
+		//missing assets table
+		$this->missingAssets = array();
 
 		/*----------------------------------------------------------------------------
 			START: Asset management
 		----------------------------------------------------------------------------*/
-		$bFullNukeOutputDir = false; //set this to true to disable incremental update of assets
+		$bFullNukeOutputDir = true; //set this to true to disable incremental update of assets
 		
 		if($bFullNukeOutputDir) {
 			//totally remove $outputDir - start with a 100% clean slate
@@ -139,9 +143,10 @@ class Sbm2Site {
 		
 		//copy all discovered Assets into the appropriate location
 		MopLog("copy discovered assets...");
+		MopLog_lf();
 		foreach($this->discoveredAssets as $k => $asset) {
 			$asset = str_replace("\"", "", $asset);
-			MopLog_i("$asset", 1);
+			MopLog("Attempting: $asset");
 			
 			//first determine file type using extension
 			$ext = substr($asset, strrpos($asset, ".") + 1);
@@ -152,20 +157,20 @@ class Sbm2Site {
 				case "jpg":
 				case "png":
 					MopLog_i("$asset is an IMAGE with extension '$ext'", 1);
-					$this->CopyFile(escapeshellarg("../".$asset), escapeshellarg($outputDir."Images/"));
+					$this->CopyFile($asset, $outputDir."Images/");
 				break;
 				
 				case "ogv":
 				case "webm":
 				case "mp4":
 					MopLog_i("$asset is VIDEO with extension '$ext'", 1);
-					$this->CopyFile(escapeshellarg("../".$asset), escapeshellarg($outputDir."Video/"));
+					$this->CopyFile($asset, $outputDir."Video/");
 				break;
 				
 				case "oga":
 				case "mp3":
 					MopLog_i("$asset is AUDIO with extension '$ext'", 1);
-					$this->CopyFile(escapeshellarg("../".$asset), escapeshellarg($outputDir."Audio/"));
+					$this->CopyFile($asset, $outputDir."Audio/");
 				break;
 				
 				default:
@@ -183,23 +188,31 @@ class Sbm2Site {
 	}
 
 	function CopyFile($s, $d) {
-		MopLog("CopyFile pwd: ".shell_exec("pwd"));
-		MopLog("src: ".$s);
-		MopLog(shell_exec("ls -alR ".escapeshellarg($s)));
-		MopLog("dest: ".$d);
-		MopLog(shell_exec("ls -alR ".escapeshellarg($d)));
+		MopLog_i("pwd: ".trim(shell_exec("pwd")), 1);
+		MopLog_i("src: ".$s, 1);
+		MopLog_i("dest: ".$d, 1);
 		
-		$command = "rsync -vc $s $d";
-		MopLog($command);
-		$rsyncOutput = shell_exec($command);
-		MopLog($rsyncOutput);		
+		$s = "../".$s;
+		if (file_exists($s)) {
+			$s = escapeshellarg($s);
+			$d = escapeshellarg($d);
+			$command = "rsync -vc $s $d";
+			MopLog($command);
+			$rsyncOutput = shell_exec($command);
+			MopLog($rsyncOutput);		
+		} 
+		else {
+			MopLog("ASSET ERROR: can't find file $a");
+			$this->missingAssets[] = str_replace("../", "", $s);
+		}	
 	}
+
 	function SyncFolders($s, $d){
-		MopLog("SyncFolders pwd: ".shell_exec("pwd"));
-		MopLog("src: ".$s);
-		MopLog(shell_exec("ls -alR ".escapeshellarg($s)));
-		MopLog("dest: ".$d);
-		MopLog(shell_exec("ls -alR ".escapeshellarg($d)));
+		MopLog_i("pwd: ".trim(shell_exec("pwd")), 1);
+		MopLog_i("src: ".$s, 1);
+		//MopLog(shell_exec("ls -alR ".escapeshellarg($s)));
+		MopLog_i("dest: ".$d, 1);
+		//MopLog(shell_exec("ls -alR ".escapeshellarg($d)));
 		
 		$command = "rsync -vcr $s $d";
 		MopLog($command);
@@ -216,6 +229,7 @@ class Sbm2Site {
 	}	
 
 	function StartNewHtmlPage($pageName) {
+		MopLog("Starting new HTML page: $pageName");
 		$sectionName = str_replace(".html", "", $pageName);
 		$this->currentSection = $sectionName;
 		$this->debug->debug("Set current section to: $sectionName");
@@ -286,6 +300,7 @@ class Sbm2Site {
 		fwrite($this->fpCurrent, $contents."\n");
 		
 		fclose($this->fpCurrent);
+		MopLog("Ended current HTML page");
 	}
 	
 	function process() {
@@ -378,9 +393,9 @@ class Sbm2Site {
 							$bDoAutoButton_Continue = true;
 						}
 						
-						//special handling for @@button
+						//special handling for @@buttons
 						//@@button|Go to Section 2|Section 2
-						if($type == "@@button"){							
+						if($type == "@@button" || $type == "@@scorebutton"){							
 
 							//button - convert id to section name
 							foreach($this->tocTable as $entry){
@@ -394,6 +409,7 @@ class Sbm2Site {
 							
 							//user specified a button, so suppress automatic continue button...
 							$bDoAutoButton_Continue = false;
+							MopLog("Suppressing @@continue autobutton because user specified a @@button");
 						}
 						
 						if($type == "@@begin"){
@@ -427,13 +443,13 @@ class Sbm2Site {
 							switch($type) {
 								case "@@image": 
 									$id = "Images/$id";
-									break;
+								break;
 								case "@@video": 
 									$id = "Video/$id";
-									break;
+								break;
 								case "@@audio": 
 									$id = "Audio/$id";
-									break;									
+								break;
 							}
 						}
 						if($type == "@@mopplaceholder" ){
@@ -463,6 +479,7 @@ class Sbm2Site {
 						}
 						
 						if($type == "@@continue" && $bDoAutoButton_Continue == false) {
+							MopLog("Suppressing @@continue autobutton");
 							//kill auto continue button if flag is set
 							$outLn = "";
 						}
@@ -499,6 +516,19 @@ class Sbm2Site {
 			echo "<p><input type=\"submit\" name=\"deploy\" value=\"Deploy eBook\"> <- Deploy eBook to shareable link...</p>\n";
 			echo "<input type=\"hidden\" name=\"docname\" value=\"".$this->docTitle."\">\n";
 			echo "</form>\n";
+			
+			if(count($this->missingAssets) > 0){
+				//we encountered missing assets during asset management, so report them
+				echo "<hr/>\n";
+				echo "<div style=\"float:left\"><img src=\"images/warning.png\" style=\"width:64px\"></img></div>\n";
+				echo "<div><h2>Errors...</h2></div>\n";
+				//echo "<br/>\n";
+				foreach($this->missingAssets as $missingAsset) {
+					echo "<p class=\"mop_ErrorText\">Couldn't find: $missingAsset (search for it in source doc)</p>\n";
+				}
+			}
+			
+			
 			echo "<hr/>\n";
 			echo "<h2>Preview</h2>\n";
 			//echo "<div id=\"mop_Preview\">\n";

@@ -43,17 +43,11 @@
 	<script type="text/javascript" charset="utf-8">
 		$().ready(function() {
 			var elf = $('#elfinder').elfinder({
-				// lang: 'ru',             // language (OPTIONAL)
-				// uploadMaxSize : '55M',
 				url : 'Libs/elfinder-2.0-beta/php/connector.php'  // connector URL (REQUIRED)
 			}).elfinder('instance');            
 		});
 	</script>
 	
-<?php	
-	//echo "<p>Current PHP version: ".phpversion()."</p>\n";
-	//echo "<p>upload_max_filesize: ".ini_get('upload_max_filesize')."</p>\n";
-?>	
 	<!-- Element where elFinder will be created (REQUIRED) -->
 	<div id="elfinder"></div>
 
@@ -68,6 +62,13 @@
   			window.location.reload()
 		}
 	</script>
+	
+	<br/><br/>
+	<hr/>
+	
+<?php	
+	echo "<p>Maximum upload size is: ".ini_get('upload_max_filesize')."</p>\n";
+?>		
 
 </body>
 </html>

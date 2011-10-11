@@ -5,7 +5,11 @@ function MopReload() {
 }
 
 function MopToggleDevText(){
-	$('.mop_DevText').toggle("slow");
+	$('.mop_DevText').fadeToggle("400");
+}
+
+function MopToggleNotes(){
+	$('.mop_NoteTextContainer').fadeToggle("slow");
 }
 
 function MopToggleVisibility(names) {

@@ -152,6 +152,18 @@ table.mop_ScoreTable {
 	font-size: 12px;
 	color:grey;
 }
+.mop_NoteTextContainer{
+	display:none;
+	width: 75%;
+	margin-left:auto;
+	margin-right:auto;
+}
+.mop_NoteText {
+	font-family:Arial,Helvetica,sans-serif;
+	font-size: medium;
+	color:black;
+	background:lightgrey;	
+}
 .mop_BasicButton {
 	margin:6pt;
 }

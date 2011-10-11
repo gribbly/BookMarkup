@@ -275,7 +275,7 @@ class Html2Sbm {
 										$text = str_replace(">", "", $text);
 										
 										$src = $this->YankData($ln, 'src=', ' width=');
-										$this->RememberAsset($src);
+										//$this->RememberAsset($src); //@@cam - Sbm2Site handles this in a different pass, commented out to avoid the second attempt. @@todo this feels a little fragile
 										
 										$outLn = $outLn."$sbmTag|@@data'".$text."'\n";
 										//$outLn = $outLn."$sbmTag|@@data'src=".$src."'\n"; //use this version to strip width and height, if desired
