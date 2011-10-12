@@ -248,7 +248,7 @@
 							$dlFileName = $sessionFolder.$title.".zip";
 							
 							if(strpos($_SERVER['PHP_SELF'], "BookMarkup_dev") === false){
-								$bDevSkipDownload = true;
+								$bDevSkipDownload = false;
 								IndexLog("Overriding bDevSkipDownload because we're on a production server...");
 							}
 														
