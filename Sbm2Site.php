@@ -72,6 +72,11 @@ class Sbm2Site {
 		
 		//missing assets table
 		$this->missingAssets = array();
+		$this->missingVariantAssets = array();
+		
+		//variant asset tables
+		$this->variantVideoAssets = array();
+		$this->variantAudioAssets = array();
 
 		/*----------------------------------------------------------------------------
 			START: Asset management
@@ -157,20 +162,46 @@ class Sbm2Site {
 				case "jpg":
 				case "png":
 					MopLog_i("$asset is an IMAGE with extension '$ext'", 1);
-					$this->CopyFile($asset, $outputDir."Images/");
+					$this->CopyFile($asset, $outputDir."Images/", false);
 				break;
 				
 				case "ogv":
 				case "webm":
 				case "mp4":
 					MopLog_i("$asset is VIDEO with extension '$ext'", 1);
-					$this->CopyFile($asset, $outputDir."Video/");
+					$this->CopyFile($asset, $outputDir."Video/", false);
+					
+					//add other variants for next step
+					switch($ext) {
+						case "ogv":
+							$this->variantVideoAssets[] = $this->TrimExtension($asset)."webm";
+							$this->variantVideoAssets[] = $this->TrimExtension($asset)."mp4";
+						break;
+						case "webm":
+							$this->variantVideoAssets[] = $this->TrimExtension($asset)."ogv";
+							$this->variantVideoAssets[] = $this->TrimExtension($asset)."mp4";
+						break;
+						case "mp4":
+							$this->variantVideoAssets[] = $this->TrimExtension($asset)."webm";
+							$this->variantVideoAssets[] = $this->TrimExtension($asset)."ogv";
+						break;
+					}
 				break;
 				
-				case "oga":
+				case "ogg":
 				case "mp3":
 					MopLog_i("$asset is AUDIO with extension '$ext'", 1);
-					$this->CopyFile($asset, $outputDir."Audio/");
+					$this->CopyFile($asset, $outputDir."Audio/", false);
+					
+					//add other variants for next step
+					switch($ext) {
+						case "ogg":
+							$this->variantAudioAssets[] = $this->TrimExtension($asset)."mp3";
+						break;
+						case "mp3":
+							$this->variantAudioAssets[] = $this->TrimExtension($asset)."ogg";
+						break;
+					}					
 				break;
 				
 				default:
@@ -181,13 +212,30 @@ class Sbm2Site {
 		}
 		$this->LogOutputSnapshot($outputDir);
 		
+		//copy all variant Assets into the appropriate location
+		MopLog("copy variant assets...");
+		MopLog_lf();
+		foreach($this->variantVideoAssets as $k => $asset) {
+			MopLog("Attempting: $asset");
+			$this->CopyFile($asset, $outputDir."Video/", true);
+		}
+		foreach($this->variantAudioAssets as $k => $asset) {
+			MopLog("Attempting: $asset");
+			$this->CopyFile($asset, $outputDir."Audio/", true);
+		}	
+		MopLog_lf();
+		$this->LogOutputSnapshot($outputDir);
 		
 		/*----------------------------------------------------------------------------
 			END: Asset management
 		----------------------------------------------------------------------------*/		
 	}
 
-	function CopyFile($s, $d) {
+	function TrimExtension($f){
+		return substr($f, 0, strrpos($f, ".")+1);
+	}
+	
+	function CopyFile($s, $d, $bVariant) {
 		MopLog_i("pwd: ".trim(shell_exec("pwd")), 1);
 		MopLog_i("src: ".$s, 1);
 		MopLog_i("dest: ".$d, 1);
@@ -202,8 +250,14 @@ class Sbm2Site {
 			MopLog($rsyncOutput);		
 		} 
 		else {
-			MopLog("ASSET ERROR: can't find file $a");
-			$this->missingAssets[] = str_replace("../", "", $s);
+			if(!$bVariant) {
+				MopLog("ASSET ERROR: can't find asset $s");
+				$this->missingAssets[] = str_replace("../", "", $s);
+			}
+			else {
+				MopLog("ASSET ERROR: can't find variant asset $s");
+				$this->missingVariantAssets[] = str_replace("../", "", $s);				
+			}
 		}	
 	}
 
@@ -517,14 +571,20 @@ class Sbm2Site {
 			echo "<input type=\"hidden\" name=\"docname\" value=\"".$this->docTitle."\">\n";
 			echo "</form>\n";
 			
-			if(count($this->missingAssets) > 0){
+			if(count($this->missingAssets) > 0 || count($this->missingVariantAssets) > 0){
 				//we encountered missing assets during asset management, so report them
 				echo "<hr/>\n";
 				echo "<div style=\"float:left\"><img src=\"images/warning.png\" style=\"width:64px\"></img></div>\n";
 				echo "<div><h2>Errors...</h2></div>\n";
 				//echo "<br/>\n";
 				foreach($this->missingAssets as $missingAsset) {
-					echo "<p class=\"mop_ErrorText\">Couldn't find: $missingAsset (search for it in source doc)</p>\n";
+					echo "<p class=\"mop_ErrorText\">Couldn't find: $missingAsset (try searching for it in source doc - this is probably a typo...)</p>\n";
+				}
+				foreach($this->missingVariantAssets as $missingVariantAsset) {
+					echo "<p class=\"mop_ErrorText\">Couldn't find: $missingVariantAsset (this is a variant asset)</p>\n";
+				}
+				if(count($this->missingVariantAssets) > 0) {
+					echo "<p class=\"mop_ErrorText\">BookMarkup expects to find <strong>.webm</strong>, <strong>.mp4</strong> and <strong>.ogv</strong> files for all video assets. BookMarkup expects to find <strong>.mp3</strong> and <strong>.ogg</strong> files for all audio assets. You specify any one, BookMarkup will look for the variants automatically. A missing variant asset means that the asset you specified in the source doc was found, but one or more of the required variants is missing. User the File Browser to check that the variants exist, and have the correct extension.</p>\n";
 				}
 			}
 			

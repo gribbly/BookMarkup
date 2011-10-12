@@ -3,12 +3,12 @@
 @@h2|H2 heading|<h2>@@text|</h2>
 @@h3|H3 heading|<h3>@@text|</h3>
 @@p|paragraph tag|<p@@param>@@text|</p>
-@@note|note tag|<div class="mop_NoteTextContainer"><p class="mop_NoteText">NOTE: @@id|</p></div>
+@@note|note tag|<img src="Images/NoteIcon.gif" style="float:left" title="Note - use Notes button to reveal"></img><div class="mop_NoteTextContainer"><p class="mop_NoteText">NOTE: @@id|</p></div><br/>
 @@img|image|<p class="mop_DevText">IMAGE (embedded): @@param</p><div class='mop_Insert'><img class='mop_ImageCenterAutoSkew' @@param>|</img></div>
 @@image|image|<p class="mop_DevText">IMAGE: @@id - @@text</p><div class='mop_Insert'><img class='mop_ImageCenterAutoSkew' src="@@id">|</img></div>
 @@mopplaceholder|insert placeholder|<p class="mop_DevText">PLACEHOLDER: @@text</p><div class='mop_Insert'><img class='mop_ImageCenter' src="@@id"></img><p><em>PLACEHOLDER: @@text</em>|</p></div>
-@@video|video|<p class="mop_DevText">VIDEO: @@id - @@text</p><div class='mop_Insert'><video id="@@param" src="@@id" width="640" height="360" preload autobuffer" class="mop_BlockCenter">Your browser does not support the video element.</video><div class="mop_VideoPlayButton"><img src="Images/VideoPlayButton_v3.png" onclick="document.getElementById('@@param').play(); hideVideoPlayButton();"></img>|</div>
-@@audio|audio|<p class="mop_DevText">AUDIO: @@id - @@text</p><div class='mop_Insert'><audio id="@@param" src="@@id" preload autobuffer" class="mop_BlockCenter">Your browser does not support the audio element.</audio><div class="mop_AudioPlayButton"><img src="Images/AudioPlayButton_v1.png" onclick="document.getElementById('@@param').play();"></img>|</div></div>
+@@video|video|<p class="mop_DevText">VIDEO: @@id - @@text</p><div class='mop_Insert'><video id="@@param" src="@@id" width="640" height="360" poster="Images/DefaultPoster.gif" preload autobuffer" class="mop_BlockCenter">Your browser does not support the video element.</video><div class="mop_VideoPlayButton"><img src="Images/VideoPlayButton_v3.png" onclick="document.getElementById('@@param').play(); hideVideoPlayButton();"></img>|</div>
+@@audio|audio|<p class="mop_DevText">AUDIO: @@id - @@text</p><div class='mop_Insert'><audio id="@@param" src="@@id" preload autobuffer class="mop_BlockCenter">Your browser does not support the audio element.</audio><div class="mop_AudioPlayButton"><img src="Images/AudioPlayButton_v1.png" onclick="document.getElementById('@@param').play();"></img>|</div></div>
 @@continue|automatic continue button magically links to next page|<p class="mop_DevText">CONTINUE: @@id</p><div class='glossyButtonContainer'><a class="glossyButton" href="@@id.html"></a><p class="glossyButtonText">@@text</p>|</div>
 @@begin|autobutton links to beginning of actual book content|<p class="mop_DevText">BEGIN: @@id</p><div class='glossyButtonContainer'><a class="glossyButton" href="@@id.html"></a><p class="glossyButtonText">@@text</p>|</div>
 @@button|a button that links to a target section|<p class="mop_DevText">BUTTON: @@id</p><div class='glossyButtonContainer'><a class="glossyButton" href="@@id.html"></a><p class="glossyButtonText">@@text</p>|</div>
