@@ -247,6 +247,18 @@ class Html2Sbm {
 										//MopLog("OUTLINE: $outLn");
 									break;
 									
+									case "@@setscore":
+										MopLog("AS: setscore");
+										$bNoParagraph = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $value = $chunks[1]; }
+	
+										$outLn = $outLn."$sbmTag|$value\n";
+										//MopLog("OUTLINE: $outLn");
+									break;									
+									
 									case "@@p":
 										MopLog("AS: paragraph");
 										if($bNoParagraph == true) {
@@ -343,6 +355,27 @@ class Html2Sbm {
 										else {
 											$this->RememberAsset($src);
 											$src = substr($src, strrpos($src, "/") + 1); //throw away path
+											$outLn = $outLn = $outLn."$sbmTag|".$text."|".$src."\n";
+										}
+										MopLog("OUTLINE: $outLn");
+									break;
+
+									case "@@snippet":
+										MopLog("AS: snippet");
+										$bNoParagraph = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $text = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $src = $chunks[2]; }
+										
+										if($src === "placeholder") {
+											MopLog("This is a placeholder");
+											//@@todo - shouldn't be hardcoding placeholder src, but I am =]
+											$outLn = $outLn."@@mopplaceholder|".$text."|"."PlaceholderAudio.gif"."\n";
+										}
+										else {
+											$this->RememberAsset($src);
 											$outLn = $outLn = $outLn."$sbmTag|".$text."|".$src."\n";
 										}
 										MopLog("OUTLINE: $outLn");

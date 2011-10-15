@@ -98,6 +98,18 @@
 		document.write("</tr></table></div>\n");
 	}
 	
+	function MopSetScore(s) {
+		var tmp = parseInt(localStorage['mop.score']);
+		tmp = s;
+		if(tmp < 0) {
+			tmp = 0;
+		}
+		if(tmp > localStorage['mop.maxScore']) {
+			tmp = localStorage['mop.maxScore'];
+		}
+		localStorage['mop.score'] = tmp;
+	}	
+	
 	function MopHandleScore(s) {
 		var tmp = parseInt(localStorage['mop.score']);
 		tmp = tmp + s;

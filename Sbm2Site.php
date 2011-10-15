@@ -196,8 +196,7 @@ class Sbm2Site {
 					
 					//copy poster for this asset
 					$assetPoster = substr($asset, 0, strrpos($asset, ".") + 1)."jpg";
-					MopLog_i("YOYOYO", 1);
-					MopLog_i("Poster: $assetPoster", 1);
+					MopLog_i("Copy poster: $assetPoster", 1);
 					$this->CopyFile($assetPoster, $outputDir."Video/", false);
 					
 				break;
@@ -524,10 +523,13 @@ class Sbm2Site {
 								break;
 							}
 						}
+						if($type == "@@snippet" ){
+							$param = file_get_contents("../".$id);
+						}
 						if($type == "@@mopplaceholder" ){
 							$param = "$id";
 							$id = "Images/$id";
-						}
+						}						
 						
 						//default handling (for all @@tags)
 						if(array_key_exists('htmlOpen', $tag)){

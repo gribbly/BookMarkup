@@ -69,6 +69,15 @@ p + p {
 	background:#FFF;
 	z-index: 2;
 }
+mop_Snippet{
+	position: relative;
+	width: 80%;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
 .mop_ImageCenterAutoSkew {
 	display: block;
 	margin-left: auto;
@@ -135,6 +144,9 @@ p + p {
 	margin-right: auto;	
 	cursor: pointer;
 	z-index: 1;
+}
+.mop_TheEnd {
+	text-align:center;
 }
 table.mop_ScoreTable {
 	margin: 10px auto 10px auto;
