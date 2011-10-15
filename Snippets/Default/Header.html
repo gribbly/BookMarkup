@@ -30,9 +30,9 @@
 		}
 	}
 	
-	function hideVideoPlayButton() {
+	function hideVideoPlayButton(id) {
 		if( bVideoPlayButton == true ) {
-			//console.log("hideVideoPlayButton()");
+			console.log("hideVideoPlayButton() - " + id);
 			$(".mop_VideoPlayButton").fadeOut(600);
 			bVideoPlayButton = false;
 		}

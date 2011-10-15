@@ -132,19 +132,26 @@ class Sbm2Site {
 		$this->SyncFolders($src, $dest);
 		$this->LogOutputSnapshot($outputDir);
 
-		//copy all images from Snippets into Images
-		MopLog("copy all images from Snippets to 'Images'");
+		//copy all from Snippets/Images into Images
+		MopLog("copy all images from Snippets/Images to 'Images'");
 		$src = escapeshellarg($this->ini_array['SnippetsDir']."Images/");
 		$dest = escapeshellarg($this->outputDir."Images/");
 		$this->SyncFolders($src, $dest);
 		$this->LogOutputSnapshot($outputDir);
 
-		//copy all audio from Snippets into Audio
-		MopLog("copy all audio from Snippets into 'Audio'");
+		//copy all from Snippets/Audio into Audio
+		MopLog("copy all audio from Snippets/Audio into 'Audio'");
 		$src = escapeshellarg($this->ini_array['SnippetsDir']."Audio/");
 		$dest = escapeshellarg($this->outputDir."Audio/");
 		$this->SyncFolders($src, $dest);
 		$this->LogOutputSnapshot($outputDir);
+		
+		//copy all from Snippets/Video into Video
+		MopLog("copy video from Snippets/Video into 'Video'");
+		$src = escapeshellarg($this->ini_array['SnippetsDir']."Video/");
+		$dest = escapeshellarg($this->outputDir."Video/");
+		$this->SyncFolders($src, $dest);
+		$this->LogOutputSnapshot($outputDir);		
 		
 		//copy all discovered Assets into the appropriate location
 		MopLog("copy discovered assets...");
@@ -186,6 +193,13 @@ class Sbm2Site {
 							$this->variantVideoAssets[] = $this->TrimExtension($asset)."ogv";
 						break;
 					}
+					
+					//copy poster for this asset
+					$assetPoster = substr($asset, 0, strrpos($asset, ".") + 1)."jpg";
+					MopLog_i("YOYOYO", 1);
+					MopLog_i("Poster: $assetPoster", 1);
+					$this->CopyFile($assetPoster, $outputDir."Video/", false);
+					
 				break;
 				
 				case "ogg":
@@ -372,11 +386,11 @@ class Sbm2Site {
 			//checking for local storage and set up scoring
 			fwrite($this->fpCurrent, "<script>\n");
 			fwrite($this->fpCurrent, "if('localStorage' in window && window['localStorage'] !== null) {\n");
-			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Browser supports Web Storage (that's good!)</p>\");\n");
+			//fwrite($this->fpCurrent, "\tdocument.write(\"<p>Browser supports Web Storage (that's good!)</p>\");\n");
 			fwrite($this->fpCurrent, "\tlocalStorage['mop.score'] = ".$this->ini_array['StartScore'].";\n");
 			fwrite($this->fpCurrent, "\tlocalStorage['mop.maxScore'] = ".$this->ini_array['MaxScore'].";\n");
-			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Current score: \" + localStorage['mop.score'] + \"</p>\");\n");
-			fwrite($this->fpCurrent, "\tdocument.write(\"<p>Max score: \" + localStorage['mop.maxScore'] + \"</p>\");\n");
+			//fwrite($this->fpCurrent, "\tdocument.write(\"<p>Current score: \" + localStorage['mop.score'] + \"</p>\");\n");
+			//fwrite($this->fpCurrent, "\tdocument.write(\"<p>Max score: \" + localStorage['mop.maxScore'] + \"</p>\");\n");
 			fwrite($this->fpCurrent, "} else {\n");
 			fwrite($this->fpCurrent, "\tdocument.writeln(\"<p>Problem: Browser doesn't support Web Storage (scoring won't work)...</p>\");\n");
 			fwrite($this->fpCurrent, "}\n");
@@ -493,15 +507,19 @@ class Sbm2Site {
 						}
 
 						if($type == "@@image" || $type == "@@video" || $type == "@@audio" ){
-							$param = "$id";
 							switch($type) {
-								case "@@image": 
+								case "@@image":
+									$param = "$id";
 									$id = "Images/$id";
 								break;
 								case "@@video": 
+									$id = substr($id, 0, strrpos($id, "."));
+									$param = "$id";
 									$id = "Video/$id";
 								break;
-								case "@@audio": 
+								case "@@audio":
+									$id = substr($id, 0, strrpos($id, "."));
+									$param = "$id";
 									$id = "Audio/$id";
 								break;
 							}
