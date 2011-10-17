@@ -327,6 +327,9 @@
 									//note: Be careful! Fifth param (outputDir) in call to Sbm2Site will get nuked!
 									$sbm2Site = new Sbm2Site($title, $displayTitle, $sessionFolder, $processDoc.".sbm", $sessionFolder.$title."/");
 									$sbm2Site->process();
+									
+									require_once("Credits.php");
+									$credits = new Credits($title, $displayTitle, $sessionFolder);
 								}
 							}
 							else {

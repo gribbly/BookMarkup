@@ -77,6 +77,10 @@ class Sbm2Site {
 		//variant asset tables
 		$this->variantVideoAssets = array();
 		$this->variantAudioAssets = array();
+		
+		//asset credits
+		$this->discoveredAssetCredits = array();
+		$this->discoveredAssetCreditsFileName = $sessionFolder.$docTitle.".assetcredits";	
 
 		/*----------------------------------------------------------------------------
 			START: Asset management
@@ -155,6 +159,9 @@ class Sbm2Site {
 		
 		//copy all discovered Assets into the appropriate location
 		MopLog("copy discovered assets...");
+		foreach($this->discoveredAssets as $k => $asset) {
+			MopLog_i($asset, 1);
+		}
 		MopLog_lf();
 		foreach($this->discoveredAssets as $k => $asset) {
 			$asset = str_replace("\"", "", $asset);
@@ -215,6 +222,10 @@ class Sbm2Site {
 							$this->variantAudioAssets[] = $this->TrimExtension($asset)."ogg";
 						break;
 					}					
+				break;
+				
+				case "txt":
+					MopLog_i("$asset is TEXT (i.e., snippet) with extension '$ext'", 1);
 				break;
 				
 				default:
@@ -293,6 +304,11 @@ class Sbm2Site {
 		MopLog(shell_exec("ls -alR ".escapeshellarg($dir)));
 		MopLog("***OUTPUT SNAPSHOT END***");
 		MopLog_lf();	
+	}	
+	
+	function RememberAssetCredit($c) {
+		MopLog("RememberAssetCredit() - ".$c);
+		$this->discoveredAssetCredits[] = $c;
 	}	
 
 	function StartNewHtmlPage($pageName) {
@@ -406,9 +422,10 @@ class Sbm2Site {
 				
 				$outLn = "";
 				$bTagLine = false;
+				$bNoFurtherMatches = false;
 				
 				foreach($this->sbmTags as $tag) {
-					if( strpos($ln, $tag['sbmTag']) !== false ) {
+					if( strpos($ln, $tag['sbmTag']) !== false && $bNoFurtherMatches === false ) {
 						MopLog("MATCH: ".$tag['sbmTag']);
 						$bTagLine = true;
 						
@@ -504,7 +521,21 @@ class Sbm2Site {
 								$n++;
 							}
 						}
-
+						if($type == "@@assetcredit" ){
+							$bNoFurtherMatches = true;
+							$url = $this->currentSection.".html";
+							$credit = "$text [on <a href=\"$url\">this page</a>]";
+							$this->RememberAssetCredit($credit);
+						}
+						if($type == "@@asset" ){
+							$bNoFurtherMatches = true;
+						}
+						if($type == "@@audiobg" ){
+							$id = substr($id, 0, strrpos($id, "."));
+							$param = $id;
+							$id = "Audio/$id";
+							$bNoFurtherMatches = true;
+						}
 						if($type == "@@image" || $type == "@@video" || $type == "@@audio" ){
 							switch($type) {
 								case "@@image":
@@ -608,13 +639,18 @@ class Sbm2Site {
 				}
 			}
 			
-			
 			echo "<hr/>\n";
 			echo "<h2>Preview</h2>\n";
 			//echo "<div id=\"mop_Preview\">\n";
 			echo "<iframe id=\"mop_Preview\" src=\"$this->startLink\"></iframe>\n";
 			//echo "</div>";
 			$this->EndCurrentHtmlPage();
+			
+			//write discoveredAssetCredits to disk
+			$fpOut = fopen("$this->discoveredAssetCreditsFileName", "w");
+			fwrite($fpOut, serialize($this->discoveredAssetCredits));
+			fclose($fpOut);
+
 			return true;
 		}
 		else {

@@ -10,7 +10,6 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" ></script>
 <script>
 	var bButtons = false;
-	var bVideoPlayButton = true;
 	var bImageRotationFlipper = false;
 	
 	function hideButtons(){
@@ -27,15 +26,24 @@
 			$("p.glossyButtonText").fadeIn(1200);
 			buttonAppearSfx();
 			bButtons = true;
+			
+			window.setTimeout(function() {
+			$('.mop_ClickHint').fadeIn(1000);
+		}, 10000);
+			
 		}
 	}
 	
 	function hideVideoPlayButton(id) {
-		if( bVideoPlayButton == true ) {
-			console.log("hideVideoPlayButton() - " + id);
-			$(".mop_VideoPlayButton").fadeOut(600);
-			bVideoPlayButton = false;
-		}
+		var hideId = "#" + id;
+		console.log("hideVideoPlayButton() - " + hideId);
+		$(hideId).fadeOut(600);
+		window.setTimeout(function() {
+			$('.mop_Caption').fadeIn(1000);
+		}, 2000);
+		window.setTimeout(function() {
+			$('.mop_Caption').fadeOut(1000);
+		}, 12000);
 	}
 	
 	function buttonAppearSfx() {
@@ -83,7 +91,10 @@
 		var tmp = parseInt(localStorage['mop.score']);
 		
 		document.write("<div class=\"mop_GenericCenter\">\n");
-		document.write("<table class=\"mop_ScoreTable\"><tr>\n");
+		document.write("<table class=\"mop_ScoreTable\">\n");
+		
+		document.write("<tr>\n");
+		document.write("<td style=\"width:64px;\">SCORE:</td>\n");
 		
 		var i = 0;
 		while(i < parseInt(localStorage['mop.maxScore'])){
@@ -95,7 +106,10 @@
 			}
 			i++;
 		}
-		document.write("</tr></table></div>\n");
+		
+		document.write("<td style=\"width:64px;\">&nbsp;</td>\n");
+		document.write("</tr>\n");
+		document.write("</table></div>\n");
 	}
 	
 	function MopSetScore(s) {

@@ -148,6 +148,16 @@ mop_Snippet{
 .mop_TheEnd {
 	text-align:center;
 }
+.mop_Caption {
+	display: none;
+	position: relative;
+	text-align: center;
+	color: white;
+	font-size: large;
+	top: -70px;
+	z-index: 5;
+	text-shadow:2px 2px #000000;
+}
 table.mop_ScoreTable {
 	margin: 10px auto 10px auto;
 	/*border:2px dashed green;*/
@@ -175,6 +185,29 @@ table.mop_ScoreTable {
 	font-size: medium;
 	color:black;
 	background:lightgrey;	
+}
+.mop_ClickHint {
+	position:relative;
+	display:none;
+	width: 184px;
+	height:80px;
+	top:-33px;
+	margin-left:auto;
+	margin-right:auto;
+	background: url(Images/ClickHint.png) no-repeat;
+	pointer-events: none;
+}
+.mop_AssetCreditContainer{
+	display:none;
+	width: 75%;
+	margin-left:auto;
+	margin-right:auto;
+}
+.mop_AssetCredit {
+	text-align:right;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size: small;
+	color:lightgrey;
 }
 .mop_BasicButton {
 	margin:6pt;

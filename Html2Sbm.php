@@ -98,7 +98,7 @@ class Html2Sbm {
 		//MopLog_i($src, 1);
 		
 		$this->discoveredAssets[] = $src;
-	}
+	}	
 	
 	function process() {
 		if($this->inputFileName && $this->outputFileName) {
@@ -140,6 +140,7 @@ class Html2Sbm {
 						$outLn = "";
 						$bSuppressLine = false;	//output should be skipped (e.g., empty paragraph)
 						$bNoParagraph = false; //don't interpret this line as paragraph (because it's already something else, like a button)
+						$bNoFurtherMatches = false; //ignore matches, because we already matched something we like
 						$attribsFromEnclosingParagraph = ""; //some tags (like img) are nested inside a paragraph. We want to collect the attributes from the enclosing paragraph too
 						
 						//extract styles
@@ -167,7 +168,7 @@ class Html2Sbm {
 						
 						//look through ini_array for tags that appear in this line
 						foreach($this->ini_array as $searchTag) {
-							if(strpos($ln, $searchTag['needle']) !== false) {
+							if(strpos($ln, $searchTag['needle']) !== false && $bNoFurtherMatches === false) {
 
 								MopLog("MATCH: ".$searchTag['needle']);
 								
@@ -245,6 +246,35 @@ class Html2Sbm {
 	
 										$outLn = $outLn."$sbmTag|$label|$link|$data\n";
 										//MopLog("OUTLINE: $outLn");
+									break;
+									
+									case "@@assetcredit":
+										MopLog("AS: assetcredit");
+										$bNoParagraph = true;
+										$bNoFurtherMatches = true;
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { 
+											$credit = trim(htmlentities($chunks[1]));
+											$outLn = $outLn."$sbmTag|$credit\n";
+										}
+										//MopLog("OUTLINE: $outLn");										
+
+									break;
+									
+									case "@@asset":
+										MopLog("AS: asset");
+										$bNoParagraph = true;
+										$bNoFurtherMatches = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(2, $chunks)) { 
+											$src = $chunks[2];
+											$this->RememberAsset($src);
+											$outLn = "";
+										}
+										MopLog("OUTLINE: (none - @@asset just includes assets)");										
 									break;
 									
 									case "@@setscore":
@@ -338,6 +368,29 @@ class Html2Sbm {
 										MopLog("OUTLINE: $outLn");
 									break;
 									
+									case "@@audiobg":
+										MopLog("AS: audiobg");
+										$bNoParagraph = true;
+										$bNoFurtherMatches = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $text = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $src = $chunks[2]; }
+										
+										if($src === "placeholder") {
+											MopLog("This is a placeholder");
+											//@@todo - shouldn't be hardcoding placeholder src, but I am =]
+											$outLn = $outLn."@@mopplaceholder|".$text."|"."PlaceholderAudio.gif"."\n";
+										}
+										else {
+											$this->RememberAsset($src);
+											$src = substr($src, strrpos($src, "/") + 1); //throw away path
+											$outLn = $outLn = $outLn."$sbmTag|".$text."|".$src."\n";
+										}
+										MopLog("OUTLINE: $outLn");
+									break;
+									
 									case "@@audio":
 										MopLog("AS: audio");
 										$bNoParagraph = true;
@@ -372,7 +425,7 @@ class Html2Sbm {
 										if($src === "placeholder") {
 											MopLog("This is a placeholder");
 											//@@todo - shouldn't be hardcoding placeholder src, but I am =]
-											$outLn = $outLn."@@mopplaceholder|".$text."|"."PlaceholderAudio.gif"."\n";
+											$outLn = $outLn."@@mopplaceholder|".$text."|"."PlaceholderSnippet.gif"."\n";
 										}
 										else {
 											$this->RememberAsset($src);
