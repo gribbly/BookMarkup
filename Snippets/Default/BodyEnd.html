@@ -3,17 +3,78 @@
 </body>
 <script type="text/javascript">
 	$(document).ready(function(){
+        SimpleLog("document.ready - init");
+        SimpleLog("document.ready - location: " + document.location.href);
+        SimpleLog("document.ready - mop.url: " + localStorage['mop.url']);
+        SimpleLog("document.ready - score: " + localStorage['mop.score']);
+        SimpleLog("document.ready - deltaScore: " + localStorage['mop.deltaScore']);
+        SimpleLog("document.ready - undoScore: " + localStorage['mop.undoScore']);
+
+		if (localStorage.getItem("mop.url") != "null") {
+			SimpleLog("document.ready - we have a mop.url...");
+			var bSamePage = false;
+			if(document.location.href == localStorage['mop.url']){
+				bSamePage = true;
+			}
+			SimpleLog("document.ready - bSamePage: " + bSamePage);
+			if(bSamePage == false){
+				SimpleLog("document.ready - assuming BACK");
+				var ds = parseInt(localStorage['mop.deltaScore']);
+				var us = parseInt(localStorage['mop.undoScore']);
+				if(isNaN(ds)) { ds = 0 };
+				if(isNaN(us)) { us = 0 };
+				if(ds != 0) {
+					SimpleLog("document.ready - undoing score because bSamePage = false && ds != 0");
+					
+					var tmp = parseInt(localStorage['mop.score']);				
+					tmp -= parseInt(localStorage['mop.deltaScore']);           	
+					localStorage['mop.score'] = tmp;
+					SimpleLog("document.ready - score: " + localStorage['mop.score']);
+				}
+				else if(us != 0) {
+					SimpleLog("document.ready - undoing score because bSamePage = false && ds != 0");
+					
+					var tmp = parseInt(localStorage['mop.score']);				
+					tmp = parseInt(localStorage['mop.undoScore']);           	
+					localStorage['mop.score'] = tmp;
+					SimpleLog("document.ready - score: " + localStorage['mop.score']);
+				}
+				else {
+					SimpleLog("document.ready - not undoing score because mop.deltaScore AND mop.undoScore are 0!");
+					SimpleLog("document.ready - ds: " + ds);
+					SimpleLog("document.ready - us: " + us);
+				}
+			}
+			else {
+				SimpleLog("document.ready - assuming RELOAD");
+				SimpleLog("document.ready - not undoing score because bSamePage = true");
+			}
+		}
+		else{
+			SimpleLog("document.ready - assuming STANDARD NAV");
+			SimpleLog("document.ready - not undoing score because mop.url = null");
+		}
+
 		hideButtons();
 		if( isScrolledIntoView("body")) {
 			showButtons();
 		}
-	  rotateImages();
+		rotateImages();
 	});
 
 	$(window).scroll(function() {
 		if ($('body').height() <= ($(window).height() + $(window).scrollTop())) {
 			showButtons();
 		}
+	});
+	
+	$(window).bind('beforeunload', function() {
+		localStorage['mop.url'] = document.location.href;
+    });
+    
+	$("a").click(function(event) {
+		localStorage['mop.url'] = null;		
+		$(window).unbind("beforeunload");
 	});
 
 @@mop_helper_scripts

@@ -7,7 +7,7 @@
 		@@mop_style_sheet
 </style>
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" ></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" ></script>
 <script>
 	var bButtons = false;
 	var bImageRotationFlipper = false;
@@ -36,7 +36,7 @@
 	
 	function hideVideoPlayButton(id) {
 		var hideId = "#" + id;
-		console.log("hideVideoPlayButton() - " + hideId);
+		//console.log("hideVideoPlayButton() - " + hideId);
 		$(hideId).fadeOut(600);
 		window.setTimeout(function() {
 			$('.mop_Caption').fadeIn(1000);
@@ -57,16 +57,16 @@
 		var imgs = document.getElementsByClassName('mop_ImageCenterAutoSkew');
 		var imgsArray = Array.prototype.slice.call(imgs, 0);
 		imgsArray.forEach(function(img) {
-						  if(bImageRotationFlipper == false) {
-							img.style.MozTransform = "rotate(2deg)";
-							img.style.webkitTransform = "rotate(2deg)";
-							bImageRotationFlipper = true;
-						  }
-						  else {
-							img.style.MozTransform = "rotate(-2deg)";
-							img.style.webkitTransform = "rotate(-2deg)";
-							bImageRotationFlipper = false;
-						  }
+			  if(bImageRotationFlipper == false) {
+				img.style.MozTransform = "rotate(2deg)";
+				img.style.webkitTransform = "rotate(2deg)";
+				bImageRotationFlipper = true;
+			  }
+			  else {
+				img.style.MozTransform = "rotate(-2deg)";
+				img.style.webkitTransform = "rotate(-2deg)";
+				bImageRotationFlipper = false;
+			  }
 	  });
 	}	
 
@@ -87,7 +87,41 @@
 		return bReturn;
 	}
 	
+	function MopShowScoreVideo(i, s){
+		var ids = new Array();
+		ids = i.split(",");
+		
+		var scores = new Array();
+		scores = s.split(",");
+		
+		var tmp = parseInt(localStorage['mop.score']);
+		
+		//tmp = 0;
+		var bFoundVideo = false;
+		for(k in scores){
+			SimpleLog("<p class=\"mop_DevText\">Score is "+tmp+"</p>");
+			SimpleLog("<p class=\"mop_DevText\">k[k] is "+scores[k]+"</p>");
+			SimpleLog("<p class=\"mop_DevText\">video is "+ids[k]+"</p>");
+			if(scores[k] == tmp){
+				bFoundVideo = true;
+				SimpleLog("<p class=\"mop_DevText\">VIDEO: "+ids[k]+"</p>");
+				var src = ids[k];
+				var id = src.substr(0,src.lastIndexOf("."));
+				var buttonId = id.split(' ').join('')
+				src = "Video/"+id;
+				document.write("<div class='mop_Insert'><video id='"+id+"' width=\"640\" height=\"360\" poster='"+src+".jpg' preload autobuffer class=\"mop_BlockCenter\">\n");
+				document.write("<source src='"+src+".webm' type='video/webm; codecs=\"vp8, vorbis\"'/><source src='"+src+".ogv' type='video/ogg; codecs=\"theora, vorbis\"'/><source src='"+src+".mp4'/>Your browser does not support the video element.</video>");
+				document.write("<div id = 'button_"+buttonId+"' class='mop_VideoPlayButton'><img src='Images/VideoPlayButton_v4.png' onclick=\"document.getElementById('"+id+"').play(); hideVideoPlayButton('button_"+buttonId+"');\"></img></div></div>\n");
+			}
+		}
+		if(!bFoundVideo){
+			SimpleLog("ERROR: Didn't find ending video for score: " + tmp);
+			alert("ERROR: Didn't find ending video for score: " + tmp);
+		}
+	}
+	
 	function MopShowScore() {
+		SimpleLog("MopShowScore() - init");
 		var tmp = parseInt(localStorage['mop.score']);
 		
 		document.write("<div class=\"mop_GenericCenter\">\n");
@@ -110,31 +144,50 @@
 		document.write("<td style=\"width:64px;\">&nbsp;</td>\n");
 		document.write("</tr>\n");
 		document.write("</table></div>\n");
+		SimpleLog("MopShowScore() - displayed " + tmp);
 	}
 	
 	function MopSetScore(s) {
-		var tmp = parseInt(localStorage['mop.score']);
+		SimpleLog("MopSetScore() - s: " + s);
 		tmp = s;
 		if(tmp < 0) {
 			tmp = 0;
 		}
-		if(tmp > localStorage['mop.maxScore']) {
-			tmp = localStorage['mop.maxScore'];
+		if (localStorage.getItem("mop.maxScore") !== null) {
+			if(tmp > localStorage['mop.maxScore']) {
+				tmp = localStorage['mop.maxScore'];
+			}
 		}
+		localStorage['mop.undoScore'] = localStorage['mop.score'];
+		SimpleLog("MopSetScore() - undoScore is: " + localStorage['mop.undoScore']);
+		localStorage['mop.deltaScore'] = null;
+		SimpleLog("MopHandleScore() - deltaScore is: " + parseInt(localStorage['mop.deltaScore']));
 		localStorage['mop.score'] = tmp;
+		SimpleLog("MopSetScore() - score: " + localStorage['mop.score']);
 	}	
 	
 	function MopHandleScore(s) {
+		SimpleLog("MopHandleScore() - s: " + s);
 		var tmp = parseInt(localStorage['mop.score']);
 		tmp = tmp + s;
 		if(tmp < 0) {
 			tmp = 0;
 		}
-		if(tmp > localStorage['mop.maxScore']) {
-			tmp = localStorage['mop.maxScore'];
+		if (localStorage.getItem("mop.maxScore") !== null) {
+			if(tmp > localStorage['mop.maxScore']) {
+				tmp = localStorage['mop.maxScore'];
+			}
 		}
+		localStorage['mop.undoScore'] = null;
+		SimpleLog("MopSetScore() - undoScore is: " + localStorage['mop.undoScore']);
+		localStorage['mop.deltaScore'] = s;
+		SimpleLog("MopHandleScore() - deltaScore is: " + parseInt(localStorage['mop.deltaScore']));
 		localStorage['mop.score'] = tmp;
-	}	
+		SimpleLog("MopHandleScore() - score: " + localStorage['mop.score']);
+	}
+	
+	function SimpleLog(msg){
+		//$('#mop_Content').append("<p class=\"mop_DevText\">"+msg+"</p>");
+	}
 </script>
-
 </head>

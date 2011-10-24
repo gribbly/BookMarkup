@@ -1,7 +1,13 @@
 <body>
 <div id="mop_Panel">
-<button onclick="window.location='index.html'">Home</button>
-<button onclick="MopToggleNotes()">Notes</button>
-<button onclick="MopToggleDevText()">DevText</button>
+	<button onclick="window.location='index.html'">Home</button>
+	<button onclick="MopToggleNotes()">Notes</button>
+	<button onclick="MopToggleDevText()">DevText</button>
 </div>
 <div id="mop_Content">
+<p class="mop_DevText">
+<script>
+	var tmp = parseInt(localStorage['mop.score']);
+	document.write("Score: " + tmp);
+</script>
+</p>

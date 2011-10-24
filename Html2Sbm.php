@@ -367,7 +367,29 @@ class Html2Sbm {
 										}
 										MopLog("OUTLINE: $outLn");
 									break;
-									
+									case "@@scorevideos":
+										MopLog("AS: scorevideos");
+										$bNoParagraph = true;
+										
+										$chunks = explode("|", trim(strip_tags($ln)));
+										
+										if(array_key_exists(1, $chunks)) { $text = $chunks[1]; }
+										if(array_key_exists(2, $chunks)) { $src = $chunks[2]; }
+										if(array_key_exists(3, $chunks)) { $param = $chunks[3]; }
+										
+										$srcs = explode(",", $src);
+										$src = "";
+										
+										foreach($srcs as $s) {
+											$this->RememberAsset($s);
+											$src = $src.",".substr($s, strrpos($s, "/") + 1); //throw away path
+										}
+										
+										$src = substr($src, 1); //trim leading ","
+										
+										$outLn = $outLn = $outLn."$sbmTag|".$text."|".$src."|".$param."\n";
+										MopLog("OUTLINE: $outLn");
+									break;									
 									case "@@audiobg":
 										MopLog("AS: audiobg");
 										$bNoParagraph = true;

@@ -19,7 +19,18 @@ body:before {
 	z-index: 100;
 }
 #mop_Panel {
-	/*background:red;*/
+	position:fixed;
+	top: 1em;
+	background:none;
+	opacity: .025;
+	-webkit-transition: opacity 1s ease-in-out;
+	-moz-transition: opacity 1s ease-in-out;
+	-o-transition: opacity 1s ease-in-out;
+	-ms-transition: opacity 1s ease-in-out;	
+	transition: opacity 1s ease-in-out;	
+}
+#mop_Panel:hover {
+	opacity: .8;
 }
 #mop_Content {
 	background:white;

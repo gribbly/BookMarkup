@@ -404,6 +404,9 @@ class Sbm2Site {
 			//fwrite($this->fpCurrent, "\tdocument.write(\"<p>Browser supports Web Storage (that's good!)</p>\");\n");
 			fwrite($this->fpCurrent, "\tlocalStorage['mop.score'] = ".$this->ini_array['StartScore'].";\n");
 			fwrite($this->fpCurrent, "\tlocalStorage['mop.maxScore'] = ".$this->ini_array['MaxScore'].";\n");
+			fwrite($this->fpCurrent, "\tlocalStorage['mop.deltaScore'] = null;\n");
+			fwrite($this->fpCurrent, "\tlocalStorage['mop.undoScore'] = null;\n");			
+			fwrite($this->fpCurrent, "\tlocalStorage['mop.url'] = null;\n");
 			//fwrite($this->fpCurrent, "\tdocument.write(\"<p>Current score: \" + localStorage['mop.score'] + \"</p>\");\n");
 			//fwrite($this->fpCurrent, "\tdocument.write(\"<p>Max score: \" + localStorage['mop.maxScore'] + \"</p>\");\n");
 			fwrite($this->fpCurrent, "} else {\n");
@@ -544,7 +547,8 @@ class Sbm2Site {
 								break;
 								case "@@video": 
 									$id = substr($id, 0, strrpos($id, "."));
-									$param = "$id";
+									//$param = "$id";
+									$param = str_replace(" ", "", $id);
 									$id = "Video/$id";
 								break;
 								case "@@audio":
@@ -554,6 +558,10 @@ class Sbm2Site {
 								break;
 							}
 						}
+						if($type == "@@scorevideos" ){
+
+							$bNoFurtherMatches = true;
+						}						
 						if($type == "@@snippet" ){
 							$param = file_get_contents("../".$id);
 						}
